@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth & Financial Insights | IIG Smart Farmers Limited</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-light { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        /* Smooth Dropdown Transitions */
+        .dropdown-menu {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(10px);
+            opacity: 0;
+            visibility: hidden;
+        }
+        .group:hover .dropdown-menu {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <nav class="bg-white/95 backdrop-blur-md shadow-sm border-b border-green-100 sticky top-0 z-[100]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="index.html" class="flex items-center transition hover:opacity-80">
+                        <img src="IIG LOGO.jpeg" alt="IIG Logo" class="h-12 md:h-14 w-auto object-contain">
+                    </a>
+                </div>
+
+                <div class="hidden md:flex space-x-8 items-center text-sm font-medium">
+                    <a href="index.html" class="text-gray-600 hover:text-green-600 transition">Home</a>
+                    <a href="about us.html" class="text-gray-600 hover:text-green-600 transition">About</a>
+                    
+                    <div class="relative group h-20 flex items-center">
+                        <button class="flex items-center text-green-700 font-bold transition font-medium">
+                            Explore <i class="fas fa-chevron-down ml-2 text-[10px] transition-transform group-hover:rotate-180"></i>
+                        </button>
+                        <div class="dropdown-menu absolute top-full left-0 w-72 bg-white shadow-2xl rounded-b-2xl border-t-4 border-green-600 z-[110] py-3">
+                            <a href="services.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition"><i class="fas fa-seedling mr-3 text-green-600 w-4"></i> Our Services</a>
+                            <a href="location.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition"><i class="fas fa-map-marker-alt mr-3 text-green-600 w-4"></i> Locations</a>
+                            <a href="register.html" class="block px-6 py-3 text-sm text-green-700 font-bold hover:bg-green-100 transition"><i class="fas fa-user-plus mr-3 text-green-600 w-4"></i> Become a Member</a>
+                            <a href="impact.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition"><i class="fas fa-chart-line mr-3 text-green-600 w-4"></i> Our Impact</a>
+                            <div class="border-t border-gray-100 my-2"></div>
+                            <a href="blog.html" class="block px-6 py-3 text-sm text-green-600 font-bold bg-green-50"><i class="fas fa-hand-holding-usd mr-3 w-4"></i> Financial Hub</a>
+                        </div>
+                    </div>
+
+                    <a href="contact.html" class="text-gray-600 hover:text-green-600 transition font-medium">Contact</a>
+                    <a href="apply.html" class="bg-green-600 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-green-700 transition shadow-md active:scale-95">Apply Now</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="menu-btn" class="text-green-800 focus:outline-none p-2 rounded-lg bg-gray-50">
+                        <i id="menu-icon" class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-green-50 absolute w-full shadow-2xl z-[100] max-h-[85vh] overflow-y-auto">
+            <div class="px-4 pt-4 pb-10 space-y-2">
+                <a href="index.html" class="block px-4 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-xl">Home</a>
+                <a href="blog.html" class="block px-4 py-3 text-base font-bold text-green-700 bg-green-50 rounded-xl">Growth Insights</a>
+                
+                <div class="border-y border-gray-50 my-2">
+                    <button id="mobile-explore-btn" class="w-full flex justify-between items-center px-4 py-4 text-base font-medium text-gray-600">
+                        <span>Explore Pages</span>
+                        <i id="explore-chevron" class="fas fa-chevron-down text-xs transition-transform"></i>
+                    </button>
+                    <div id="mobile-explore-content" class="hidden bg-gray-50 rounded-xl mb-4 overflow-hidden text-left">
+                        <a href="services.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Services</a>
+                        <a href="location.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Locations</a>
+                        <a href="register.html" class="block px-8 py-3 text-sm text-green-700 font-bold border-b border-white">Become a Member</a>
+                        <a href="members.html" class="block px-8 py-3 text-sm text-gray-600">Our Members</a>
+                    </div>
+                </div>
+
+                <a href="contact.html" class="block px-4 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-xl">Contact</a>
+                <div class="pt-6">
+                    <a href="apply.html" class="block w-full text-center bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="gradient-light py-10 md:py-14 border-b border-green-50 hero-pattern text-center relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="inline-flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full border border-green-200 mb-5 shadow-sm">
+                <i class="fas fa-chart-line text-[10px] text-green-600"></i>
+                <span class="text-[10px] font-black text-green-700 uppercase tracking-widest">Financial Inclusion & Growth</span>
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-green-900">
+                Biotech & AI Insights
+            </h1>
+            
+            <p class="mt-4 text-sm md:text-base text-green-800/70 max-w-2xl mx-auto font-medium leading-relaxed italic px-4">
+                Pioneering the future of agricultural micro-credit, input financing, and community-led investment strategies.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-16">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            
+            <article class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl transition-all duration-500 group">
+                <div class="h-56 bg-slate-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1550565118-3a14e8d0386f?auto=format&fit=crop&q=80" alt="Loans" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    <div class="absolute top-4 left-4 bg-green-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-green-200">Micro-Credit</div>
+                </div>
+                <div class="p-8">
+                    <h2 class="text-xl font-black text-slate-900 group-hover:text-green-600 transition leading-tight">Predictive Machine Learning for Loan Approval</h2>
+                    <p class="text-slate-500 text-sm mt-4 leading-relaxed font-medium">Discover how IIG Smart Farmers uses historical soil data and climate patterns to provide risk-free micro-credit to marginalized farmers without collateral.</p>
+                    <div class="mt-8 flex items-center justify-between border-t border-slate-50 pt-6">
+                        <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Dec 20, 2025</span>
+                        <a href="apply.html" class="text-green-700 font-black text-[10px] uppercase tracking-widest hover:underline flex items-center italic">Learn More &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl transition-all duration-500 group">
+                <div class="h-56 bg-slate-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1622383529984-8d960d6934c2?auto=format&fit=crop&q=80" alt="Inputs" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    <div class="absolute top-4 left-4 bg-blue-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-blue-200">Input Support</div>
+                </div>
+                <div class="p-8">
+                    <h2 class="text-xl font-black text-slate-900 group-hover:text-green-600 transition leading-tight">Closing the Gap in Smart Fertilizer Distribution</h2>
+                    <p class="text-slate-500 text-sm mt-4 leading-relaxed font-medium">A deep dive into soil health maintenance and the long-term yield benefits of smart fertilizer distribution through our digital credit system.</p>
+                    <div class="mt-8 flex items-center justify-between border-t border-slate-50 pt-6">
+                        <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Dec 22, 2025</span>
+                        <a href="services.html" class="text-blue-700 font-black text-[10px] uppercase tracking-widest hover:underline flex items-center italic">Read Post &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+            <article class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl transition-all duration-500 group">
+                <div class="h-56 bg-slate-100 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80" alt="Fintech" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    <div class="absolute top-4 left-4 bg-purple-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-purple-200">FinTech & Investment</div>
+                </div>
+                <div class="p-8">
+                    <h2 class="text-xl font-black text-slate-900 group-hover:text-green-600 transition leading-tight">Scaling Group Banking with *789*7777#</h2>
+                    <p class="text-slate-500 text-sm mt-4 leading-relaxed font-medium">How offline USSD technology is bringing sophisticated financial systems to farmers, allowing for community reinvestment and wealth creation.</p>
+                    <div class="mt-8 flex items-center justify-between border-t border-slate-50 pt-6">
+                        <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest">Dec 24, 2025</span>
+                        <a href="faq.html" class="text-purple-700 font-black text-[10px] uppercase tracking-widest hover:underline flex items-center italic">View Guide &rarr;</a>
+                    </div>
+                </div>
+            </article>
+
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 py-16 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-12 border-b border-gray-800 pb-12 mb-12 text-center md:text-left">
+            <div>
+                <img src="IIG LOGO.jpeg" alt="Footer Logo" class="h-12 mb-6 filter brightness-0 invert opacity-40 mx-auto md:mx-0">
+                <p class="text-sm leading-relaxed max-w-xs mx-auto md:mx-0 font-medium">Empowering marginalised farming communities through AI-driven financial and biotech infrastructure.</p>
+            </div>
+            <div class="space-y-4">
+                <h4 class="text-white font-black uppercase text-xs tracking-widest mb-6">Explore Ecosystem</h4>
+                <a href="apply.html" class="block text-sm hover:text-green-500 transition">Credit Application</a>
+                <a href="services.html" class="block text-sm hover:text-green-500 transition">Input Distribution</a>
+                <a href="impact.html" class="block text-sm hover:text-green-500 transition">Economic Impact</a>
+            </div>
+            <div class="space-y-4">
+                <h4 class="text-white font-black uppercase text-xs tracking-widest mb-6">Contact Central</h4>
+                <p class="text-sm italic">iigsmartfarmersltd@gmail.com</p>
+                <p class="text-sm font-bold text-green-500">0113271924</p>
+            </div>
+        </div>
+        <p class="text-center text-[10px] opacity-40 font-black tracking-[0.5em] uppercase">&copy; 2025 IIG SMART FARMERS LIMITED</p>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const mobileExploreBtn = document.getElementById('mobile-explore-btn');
+        const mobileExploreContent = document.getElementById('mobile-explore-content');
+        const exploreChevron = document.getElementById('explore-chevron');
+
+        // Toggle Main Mobile Menu (with X Logic)
+        menuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.replace('fa-bars', 'fa-times'); // Changes to X
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.replace('fa-times', 'fa-bars'); // Back to hamburger
+            }
+        });
+
+        // Toggle Mobile Explore Accordion
+        mobileExploreBtn.addEventListener('click', () => {
+            mobileExploreContent.classList.toggle('hidden');
+            exploreChevron.classList.toggle('rotate-180');
+        });
+
+        // Close menu on resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    </script>
+</body>
+</html>

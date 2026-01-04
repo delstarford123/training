@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal & Privacy | IIG Smart Farmers Limited</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-light { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        /* Legal Content Styling */
+        .legal-content h2 { @apply text-2xl font-black text-green-900 mt-12 mb-4 border-l-4 border-green-600 pl-4 uppercase tracking-tight; }
+        .legal-content p { @apply text-gray-600 leading-relaxed mb-6 font-medium; }
+        .legal-content ul { @apply list-disc list-inside text-gray-600 mb-8 space-y-3 pl-2; }
+        .legal-content strong { @apply text-green-800 font-bold; }
+
+        /* Smooth Dropdown Transitions */
+        .dropdown-menu {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(10px);
+            opacity: 0;
+            visibility: hidden;
+        }
+        .group:hover .dropdown-menu {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-gray-800">
+
+    <nav class="bg-white/95 backdrop-blur-md shadow-sm border-b border-green-100 sticky top-0 z-[100]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="index.html" class="flex items-center transition hover:opacity-80">
+                        <img src="IIG LOGO.jpeg" alt="IIG Logo" class="h-12 md:h-14 w-auto object-contain">
+                    </a>
+                </div>
+
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html" class="text-gray-600 hover:text-green-600 transition font-medium text-sm">Home</a>
+                    <a href="about us.html" class="text-gray-600 hover:text-green-600 transition font-medium text-sm">About</a>
+                    
+                    <div class="relative group h-20 flex items-center">
+                        <button class="flex items-center text-gray-600 group-hover:text-green-600 transition font-medium text-sm font-bold">
+                            Explore <i class="fas fa-chevron-down ml-2 text-[10px] transition-transform group-hover:rotate-180"></i>
+                        </button>
+                        
+                        <div class="dropdown-menu absolute top-full left-0 w-72 bg-white shadow-2xl rounded-b-2xl border-t-4 border-green-600 z-[110] overflow-hidden">
+                            <div class="py-3">
+                                <a href="services.html" class="flex items-center px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition">
+                                    <span class="w-8 text-green-600"><i class="fas fa-seedling"></i></span> Our Services
+                                </a>
+                                <a href="register.html" class="flex items-center px-6 py-3 text-sm text-green-700 font-bold hover:bg-green-100 transition">
+                                    <span class="w-8 text-green-600"><i class="fas fa-user-plus"></i></span> Become a Member
+                                </a>
+                                <a href="members.html" class="flex items-center px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition">
+                                    <span class="w-8 text-green-600"><i class="fas fa-users"></i></span> Our Members
+                                </a>
+                                <a href="impact.html" class="flex items-center px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition">
+                                    <span class="w-8 text-green-600"><i class="fas fa-chart-line"></i></span> Our Impact
+                                </a>
+                                <div class="border-t border-gray-100 my-2"></div>
+                                <a href="legal.html" class="flex items-center px-6 py-3 text-sm text-green-600 font-bold bg-green-50">
+                                    <span class="w-8"><i class="fas fa-balance-scale"></i></span> Legal & Privacy
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="contact.html" class="text-gray-600 hover:text-green-600 transition font-medium text-sm">Contact</a>
+                    <a href="apply.html" class="bg-green-600 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-green-700 transition shadow-md active:scale-95">Apply Now</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="menu-btn" class="text-green-800 focus:outline-none p-2 rounded-lg bg-gray-50">
+                        <i id="menu-icon" class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t absolute w-full shadow-2xl z-[100] max-h-[85vh] overflow-y-auto">
+            <div class="px-4 pt-4 pb-10 space-y-2">
+                <a href="index.html" class="block px-4 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-xl">Home</a>
+                <a href="legal.html" class="block px-4 py-3 text-base font-bold text-green-700 bg-green-50 rounded-xl">Legal & Privacy</a>
+                
+                <div class="border-y border-gray-50 my-2">
+                    <button id="mobile-explore-btn" class="w-full flex justify-between items-center px-4 py-4 text-base font-medium text-gray-600">
+                        <span>Explore Pages</span>
+                        <i id="explore-chevron" class="fas fa-chevron-down text-xs transition-transform"></i>
+                    </button>
+                    <div id="mobile-explore-content" class="hidden bg-gray-50 rounded-xl mb-4 overflow-hidden">
+                        <a href="services.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Services</a>
+                        <a href="location.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Locations</a>
+                        <a href="register.html" class="block px-8 py-3 text-sm text-green-700 font-bold border-b border-white">Become a Member</a>
+                        <a href="members.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Members</a>
+                        <a href="impact.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Impact</a>
+                        <a href="blog.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Financial Insights</a>
+                        <a href="team.html" class="block px-8 py-3 text-sm text-gray-600">Leadership Board</a>
+                        <a href="help.html" class="block px-8 py-3 text-sm text-gray-600">Help Desk </a>
+                    </div>
+                </div>
+
+                <a href="contact.html" class="block px-4 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 rounded-xl">Contact</a>
+                <div class="pt-6">
+                    <a href="apply.html" class="block w-full text-center bg-green-600 text-white py-4 rounded-2xl font-black shadow-lg">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="gradient-light py-10 md:py-14 border-b border-green-50 hero-pattern text-center relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="inline-flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full border border-green-200 mb-5 shadow-sm">
+                <i class="fas fa-shield-alt text-[10px] text-green-600"></i>
+                <span class="text-[10px] font-black text-green-700 uppercase tracking-widest">Compliance & Ethics</span>
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-green-900">
+                Legal Framework
+            </h1>
+            
+            <p class="mt-4 text-sm md:text-base text-green-800/70 max-w-2xl mx-auto font-medium leading-relaxed italic">
+                Transparency and data protection are the foundations of our international operations.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-16">
+        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-8 md:p-20 legal-content relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-2 h-full bg-green-600"></div>
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-8 mb-10">
+                <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Effective Date: January 2025</p>
+                <span class="bg-slate-100 text-slate-500 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">Doc ID: IIG-LP-01</span>
+            </div>
+
+            <section>
+                <h2>1. Privacy & Data Policy</h2>
+                <p>As a technology-driven agricultural firm, <strong>IIG Smart Farmers Limited</strong> collects specific data to provide high-end AI Risk Assessments. We respect your privacy and align our practices with international data protection standards.</p>
+                <ul>
+                    <li><strong>Personal Identification:</strong> We collect National ID photos and personal details via USSD (*789*7777#) and our web portal solely for KYC (Know Your Customer) verification.</li>
+                    <li><strong>Contact Information:</strong> Email addresses and phone numbers are used to communicate loan status and fertilizer distribution schedules.</li>
+                    <li><strong>Agricultural Data:</strong> Soil health data and farm locations are used to improve our AI models and provide better biotech consultancy.</li>
+                </ul>
+                <p>We do not sell your data to third parties. All sensitive documents are encrypted and stored in secure digital vaults with limited administrative access.</p>
+            </section>
+
+            <section>
+                <h2>2. Terms of Service</h2>
+                <p>By registering as a member of IIG Smart Farmers Limited, you agree to the following conditions:</p>
+                <ul>
+                    <li><strong>Eligibility:</strong> Services are currently prioritized for small-scale farmers in marginalized societies.</li>
+                    <li><strong>Micro-Credit Agreements:</strong> Loan repayment cycles are strictly synchronized with harvest periods. Failure to adhere to group banking standards may affect future credit limits.</li>
+                    <li><strong>USSD Usage:</strong> Usage of the <strong>*789*7777#</strong> code implies consent to be contacted by our automated bot for service updates.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>3. Biotech & Technical Disclaimer</h2>
+                <p>While our <strong>Machine Learning</strong> models provide highly accurate risk assessments and weather predictions, agricultural outcomes are subject to environmental variables. IIG Smart Farmers Limited provides guidance as an investment support tool, but final farming decisions remain with the member.</p>
+            </section>
+
+            <section>
+                <h2>4. Regulatory Compliance</h2>
+                <p>IIG Smart Farmers Limited is transitioning toward registration as an <strong>International Private Limited Company</strong>. We operate under the direct oversight of our founding Board of Directors and adhere to the financial and agricultural regulations of the regions where we provide services.</p>
+            </section>
+
+            <div class="mt-16 pt-10 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                <p class="text-sm text-slate-400 italic text-center md:text-left">For formal legal inquiries, please contact our administrative headquarters.</p>
+                <a href="contact.html" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-lg uppercase text-xs tracking-widest">Contact Legal Dept</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 py-16 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-12 border-b border-gray-800 pb-12 mb-12 text-center md:text-left">
+            <div>
+                <img src="IIG LOGO.jpeg" alt="Footer Logo" class="h-14 mb-6 filter brightness-0 invert opacity-40 mx-auto md:mx-0">
+                <p class="text-sm leading-relaxed max-w-xs mx-auto md:mx-0 font-medium">Empowering marginalised farming communities through AI-driven financial and biotech infrastructure.</p>
+            </div>
+            <div class="space-y-4">
+                <h4 class="text-white font-black uppercase text-xs tracking-widest mb-6">Quick Links</h4>
+                <a href="team.html" class="block text-sm hover:text-green-500 transition">Leadership Board</a>
+                <a href="impact.html" class="block text-sm hover:text-green-500 transition">Impact Report</a>
+                <a href="faq.html" class="block text-sm hover:text-green-500 transition">System FAQ</a>
+            </div>
+            <div class="space-y-4">
+                <h4 class="text-white font-black uppercase text-xs tracking-widest mb-6">Support</h4>
+                <p class="text-sm italic">iigsmartfarmersltd@gmail.com</p>
+                <p class="text-sm font-bold text-green-500">0113271924</p>
+            </div>
+        </div>
+        <p class="text-center text-[10px] opacity-40 font-black tracking-[0.5em] uppercase">&copy; 2025 IIG SMART FARMERS LIMITED</p>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const mobileExploreBtn = document.getElementById('mobile-explore-btn');
+        const mobileExploreContent = document.getElementById('mobile-explore-content');
+        const exploreChevron = document.getElementById('explore-chevron');
+
+        // Toggle Main Mobile Menu (Hamburger to X)
+        menuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.replace('fa-bars', 'fa-times');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+
+        // Toggle Mobile Accordion
+        mobileExploreBtn.addEventListener('click', () => {
+            mobileExploreContent.classList.toggle('hidden');
+            exploreChevron.classList.toggle('rotate-180');
+        });
+
+        // Close menu on resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    </script>
+</body>
+</html>

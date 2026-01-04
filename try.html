@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .gradient-brand { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100">
+        <div class="gradient-brand p-10 text-center text-white">
+            <h1 class="text-2xl font-black uppercase tracking-widest">Join IIG Network</h1>
+            <p class="text-[10px] text-green-400 mt-2 font-bold uppercase tracking-widest opacity-80">Establish Secure Digital Identity</p>
+        </div>
+
+        <form id="register-form" class="p-8 space-y-4">
+            <div class="space-y-1">
+                <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Full Legal Name</label>
+                <input type="text" id="reg-name" class="w-full p-4 rounded-xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required placeholder="Full Name">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Email Address</label>
+                <input type="email" id="reg-email" class="w-full p-4 rounded-xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required placeholder="Email">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Access Role</label>
+                <select id="reg-role" class="w-full p-4 rounded-xl border bg-slate-50 outline-none font-bold text-xs uppercase cursor-pointer">
+                    <option value="member">Standard Member (Farmer)</option>
+                    <option value="cgt_user">CGT Officer (Financials)</option>
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Secure Password</label>
+                <input type="password" id="reg-password" class="w-full p-4 rounded-xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" id="reg-btn" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-green-700 transition uppercase text-xs tracking-[0.2em] mt-4">Initialize Account</button>
+            
+            <p class="text-center text-[10px] font-bold text-slate-400 uppercase mt-4">Already registered? <a href="login.html" class="text-green-600">Login here</a></p>
+        </form>
+    </div>
+    <div class="form-card">
+    <div class="flex items-center space-x-3 mb-6">
+        <span class="h-8 w-8 rounded-lg bg-purple-600 text-white flex items-center justify-center font-black text-xs">00</span>
+        <h3 class="font-black uppercase text-xs tracking-widest text-slate-400">Registration Type</h3>
+    </div>
+    <div class="input-group">
+        <label>I am registering as:</label>
+        <select id="reg-type" onchange="toggleCGTFields()" class="border-2 border-purple-200">
+            <option value="farmer">Standard Farmer</option>
+            <option value="cgt">CGT (Employee Request)</option>
+        </select>
+    </div>
+</div>
+
+<div id="cgt-specific-fields" class="hidden space-y-6">
+    <div class="form-card border-purple-200 bg-purple-50/30">
+        <label>Personal Passport Photo</label>
+        <div class="relative h-40 w-40 mx-auto rounded-full bg-slate-100 border-2 border-dashed border-purple-300 flex items-center justify-center overflow-hidden">
+            <input type="file" id="person-image" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this, 'preview-person')">
+            <img id="preview-person" class="absolute inset-0 w-full h-full object-cover hidden">
+            <i class="fas fa-user text-2xl text-slate-300"></i>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 mt-6">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="cgt-email" placeholder="email@example.com">
+            </div>
+            <div class="input-group">
+                <label>Nearest Primary School</label>
+                <input type="text" id="cgt-school" placeholder="e.g. Eshisiru Primary">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Logic to toggle CGT fields
+    function toggleCGTFields() {
+        const type = document.getElementById('reg-type').value;
+        document.getElementById('cgt-specific-fields').classList.toggle('hidden', type !== 'cgt');
+    }
+
+    // Update the submission logic to include the new data
+    document.getElementById('enrollment-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const type = document.getElementById('reg-type').value;
+        const path = type === 'cgt' ? 'requests/cgt_onboarding' : 'requests/onboarding';
+        
+        const requestData = {
+            type: type,
+            name: document.getElementById('m-name').value,
+            phone: document.getElementById('m-phone').value,
+            // ... (keep your existing fields)
+            geo: {
+                county: document.getElementById('geo-county').value,
+                subcounty: document.getElementById('geo-subcounty').value,
+                location: document.getElementById('geo-location').value,
+                village: document.getElementById('geo-village').value,
+                nearestSchool: document.getElementById('cgt-school').value || 'N/A'
+            },
+            personPhoto: idPersonBase64 || "", // Capture this like the ID images
+            email: document.getElementById('cgt-email').value || "",
+            idFront: idFrontBase64,
+            idBack: idBackBase64,
+            status: 'pending',
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        await database.ref(path).push(requestData);
+        alert("Request sent to Admin for approval.");
+    };
+</script>
+    <script>
+        // Use the config provided in your file
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(), database = firebase.database();
+         
+        document.getElementById('register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('reg-btn');
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value;
+            const role = document.getElementById('reg-role').value;
+
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // Save additional data to Realtime Database
+                await database.ref('users/' + userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    role: role,
+                    createdAt: Date.now()
+                });
+                alert("Account created successfully!");
+                window.location.href = "login.html";
+            } catch (error) {
+                alert("Error: " + error.message);
+                btn.innerText = "INITIALIZE ACCOUNT";
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

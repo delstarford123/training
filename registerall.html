@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Enrollment | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        .form-card { @apply bg-white p-6 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm mb-8 transition-all hover:shadow-md; }
+        input, select { @apply w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-sm transition-all; }
+        label { @apply text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 mb-2 block; }
+        
+        .step-badge { @apply h-10 w-10 rounded-xl bg-emerald-900 text-white flex items-center justify-center font-black text-xs shadow-lg mb-4 md:mb-0; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #064e3b; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-emerald-100 sticky top-0 z-[100] px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 bg-emerald-900 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+                <div>
+                    <h1 class="font-black text-xs uppercase tracking-widest text-emerald-900 leading-tight">IIG SMART FARMERS</h1>
+                    <p class="text-[8px] font-bold text-emerald-600 uppercase">Master Strategic Terminal</p>
+                </div>
+            </div>
+            <div class="hidden md:block">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Secure Identity Gateway v2.0</p>
+            </div>
+        </div>
+    </nav>
+
+    <header class="gradient-dark py-16 text-center text-white hero-pattern relative">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4">Initialize Identity</h2>
+            <p class="text-emerald-300 text-[10px] font-black uppercase tracking-[0.4em] opacity-80">Establish Secure Network Presence</p>
+        </div>
+        <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#f8fafc] to-transparent"></div>
+    </header>
+
+    <main class="max-w-4xl mx-auto -mt-12 px-4 relative z-20">
+        <form id="master-enrollment-form">
+            
+            <div class="form-card border-l-8 border-emerald-500">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-4">
+                    <div class="step-badge">00</div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm tracking-widest">Network Access Level</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Select your operational role within the ecosystem</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <label>Operational Role</label>
+                    <select id="reg-type" onchange="toggleRoleUI()" class="border-2 border-emerald-50 focus:border-emerald-500 cursor-pointer">
+                        <option value="farmer">Standard Member (Farmer / Group Member)</option>
+                        <option value="cgt">CGT Field Officer (Financials & Auditing)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-8">
+                    <div class="step-badge bg-slate-900">01</div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm tracking-widest">Core Credentials</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Personal identification and access security</p>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label>Full Legal Name (As per National ID)</label>
+                        <input type="text" id="m-name" required placeholder="DELSTARFORD ISAIAH">
+                    </div>
+                    <div>
+                        <label>Primary Phone (Registry Node)</label>
+                        <input type="tel" id="m-phone" required placeholder="0712 345 678">
+                    </div>
+                    <div>
+                        <label>Secure Email Address</label>
+                        <input type="email" id="m-email" required placeholder="name@domain.com">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label>Create Access Key (Password)</label>
+                        <input type="password" id="m-password" required placeholder="••••••••••••" minlength="8">
+                    </div>
+                </div>
+            </div>
+
+            <div id="cgt-exclusive-fields" class="hidden transition-all duration-500">
+                <div class="form-card border-2 border-indigo-500 bg-indigo-50/30">
+                    <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-8">
+                        <div class="step-badge bg-indigo-600">02</div>
+                        <div>
+                            <h3 class="font-black uppercase text-sm tracking-widest text-indigo-900">Personnel Data</h3>
+                            <p class="text-[10px] text-indigo-500 font-bold uppercase">Required for official CGT verification</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="text-center shrink-0">
+                            <label>Official Portrait</label>
+                            <div class="relative h-40 w-40 rounded-full bg-white border-4 border-dashed border-indigo-200 flex items-center justify-center overflow-hidden group">
+                                <input type="file" id="person-image-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="previewImage(this, 'preview-person')">
+                                <img id="preview-person" class="absolute inset-0 w-full h-full object-cover hidden">
+                                <i class="fas fa-user-tie text-4xl text-indigo-100 group-hover:scale-110 transition-transform"></i>
+                            </div>
+                        </div>
+                        <div class="w-full space-y-4">
+                            <div>
+                                <label>Assigned Reporting Area (Nearest School)</label>
+                                <input type="text" id="cgt-school" placeholder="e.g. Kakamega Central Primary" class="border-indigo-100 focus:ring-indigo-500">
+                            </div>
+                            <p class="text-[9px] text-indigo-400 font-bold uppercase italic">Note: CGT accounts remain locked until HQ verification is complete.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-8">
+                    <div class="step-badge bg-blue-600">03</div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm tracking-widest">Geographical Node</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Establish your physical operational location</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div><label>County</label><input type="text" id="geo-county" required placeholder="e.g. Kakamega"></div>
+                    <div><label>Sub-County</label><input type="text" id="geo-subcounty" required placeholder="e.g. Lurambi"></div>
+                    <div><label>Ward</label><input type="text" id="geo-location" required placeholder="e.g. Butsotso"></div>
+                    <div><label>Village</label><input type="text" id="geo-village" required placeholder="e.g. MMUST Area"></div>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="flex flex-col md:flex-row md:items-center md:space-x-4 mb-8">
+                    <div class="step-badge bg-orange-600">04</div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm tracking-widest text-orange-950">Identity Evidence</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">High-resolution National ID Capture Required</p>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <label>National ID (Front Face)</label>
+                        <div class="relative h-48 w-full rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden hover:bg-slate-100 transition-colors cursor-pointer">
+                            <input type="file" id="id-front-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="previewImage(this, 'preview-front')">
+                            <img id="preview-front" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <i class="fas fa-id-card text-4xl text-slate-200 mb-2"></i>
+                            <span class="text-[8px] font-black uppercase text-slate-400">Click to scan front</span>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <label>National ID (Reverse Face)</label>
+                        <div class="relative h-48 w-full rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden hover:bg-slate-100 transition-colors cursor-pointer">
+                            <input type="file" id="id-back-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="previewImage(this, 'preview-back')">
+                            <img id="preview-back" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <i class="fas fa-fingerprint text-4xl text-slate-200 mb-2"></i>
+                            <span class="text-[8px] font-black uppercase text-slate-400">Click to scan back</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full bg-emerald-950 text-emerald-400 font-black py-10 rounded-[3rem] shadow-2xl hover:bg-emerald-800 hover:text-white transition-all uppercase tracking-[0.5em] text-xs border-4 border-emerald-900/20">
+                Initialize Enrollment Packet
+            </button>
+            
+            <p class="text-center text-[10px] font-black text-slate-400 uppercase mt-8 opacity-60">
+                Authorized By IIG Smart Farmers Global Security Protocol
+            </p>
+        </form>
+    </main>
+
+    <script>
+        // Use provided configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        let idFrontBase64 = "", idBackBase64 = "", personPhotoBase64 = "";
+
+        // UI Interaction: Role Toggle
+        function toggleRoleUI() {
+            const type = document.getElementById('reg-type').value;
+            const cgtSection = document.getElementById('cgt-exclusive-fields');
+            if (type === 'cgt') {
+                cgtSection.classList.remove('hidden');
+                cgtSection.style.animation = "slideDown 0.4s ease-out";
+            } else {
+                cgtSection.classList.add('hidden');
+            }
+        }
+
+        // Image Pre-processing (Base64)
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    
+                    // Assign to global base64 vars
+                    if(previewId === 'preview-front') idFrontBase64 = e.target.result;
+                    else if(previewId === 'preview-back') idBackBase64 = e.target.result;
+                    else if(previewId === 'preview-person') personPhotoBase64 = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Unified Submission Logic
+        document.getElementById('master-enrollment-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const type = document.getElementById('reg-type').value;
+
+            // Integrity Checks
+            if(!idFrontBase64 || !idBackBase64) {
+                return alert("Identity evidence (ID images) is mandatory for enrollment.");
+            }
+            if(type === 'cgt' && !personPhotoBase64) {
+                return alert("CGT Officers must provide a portrait for digital verification.");
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-satellite-dish fa-spin mr-3"></i> Syncing Node To Master Database...`;
+
+            const name = document.getElementById('m-name').value;
+            const email = document.getElementById('m-email').value;
+            const password = document.getElementById('m-password').value;
+
+            try {
+                // 1. Create Firebase Auth Profile
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = userCredential.user.uid;
+
+                // 2. Build Unified Data Packet
+                const dataPacket = {
+                    uid: uid,
+                    name: name.toUpperCase(),
+                    email: email.toLowerCase(),
+                    phone: document.getElementById('m-phone').value,
+                    type: type,
+                    geo: {
+                        county: document.getElementById('geo-county').value.toUpperCase(),
+                        subcounty: document.getElementById('geo-subcounty').value.toUpperCase(),
+                        location: document.getElementById('geo-location').value.toUpperCase(),
+                        village: document.getElementById('geo-village').value.toUpperCase(),
+                        nearestSchool: document.getElementById('cgt-school').value || 'MEMBER'
+                    },
+                    idFront: idFrontBase64,
+                    idBack: idBackBase64,
+                    personPhoto: personPhotoBase64 || "N/A",
+                    status: 'pending',
+                    createdAt: Date.now()
+                };
+
+                // 3. Strategic Routing
+                const onboardingPath = type === 'cgt' ? 'requests/cgt_onboarding' : 'requests/onboarding';
+                
+                // Push to Onboarding Queue
+                await database.ref(`${onboardingPath}/${uid}`).set(dataPacket);
+                
+                // Set User Role Reference
+                await database.ref('users/' + uid).set({
+                    name: name,
+                    email: email,
+                    role: type,
+                    isApproved: false
+                });
+
+                alert("Enrollment Packet Sent Successfully. Your digital identity is now pending administrative synchronization.");
+                window.location.href = "login.html";
+
+            } catch (error) {
+                console.error(error);
+                alert("Synchronization Failure: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "Retry Identity Initialization";
+            }
+        };
+    </script>
+</body>
+</html>

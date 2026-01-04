@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | IIG Smart Farmers Limited</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-green { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade { animation: fadeIn 0.8s ease-out forwards; }
+
+    </style>
+    <style>
+    /* Desktop Hover Logic: Keeps the menu visible when moving mouse from button to list */
+    .group:hover .dropdown-menu {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+    }
+</style>
+    <script src="chat.js" defer></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <nav class="bg-white/95 backdrop-blur-md shadow-md sticky top-0 z-[100]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            
+            <div class="flex-shrink-0 flex items-center">
+                <a href="admin.html" class="flex items-center">
+                    <img src="IIG LOGO.jpeg" alt="IIG Logo" class="h-14 md:h-16 w-auto object-contain">
+                </a>
+            </div>
+
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="index.html" class="text-green-600 font-bold">Home</a>
+                <a href="about us.html" class="text-gray-600 hover:text-green-600 transition">About</a>
+                
+                <div class="relative group h-20 flex items-center">
+                    <button class="flex items-center text-gray-600 group-hover:text-green-600 transition font-medium">
+                        Explore <i class="fas fa-chevron-down ml-2 text-xs transition-transform group-hover:rotate-180"></i>
+                    </button>
+                    
+                    <div class="dropdown-menu absolute top-full left-0 w-64 bg-white shadow-2xl rounded-b-xl border-t-2 border-green-600 opacity-0 invisible transition-all duration-300 transform translate-y-2 z-[110]">
+                        <div class="py-2">
+                            <a href="services.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700"><i class="fas fa-seedling mr-2 text-green-600"></i> Our Services</a>
+                            <a href="location.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700"><i class="fas fa-map-marker-alt mr-2 text-green-600"></i> Locations</a>
+                            <a href="register.html" class="block px-6 py-3 text-sm text-green-700 font-bold hover:bg-green-100"><i class="fas fa-user-plus mr-2"></i> Become a Member</a>
+                            <a href="members.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700"><i class="fas fa-users mr-2 text-green-600"></i> Our Members</a>
+                            <a href="impact.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700"><i class="fas fa-chart-line mr-2 text-green-600"></i> Our Impact</a>
+                            <a href="blog.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700"><i class="fas fa-microscope mr-2 text-green-600"></i> Biotech Insights</a>
+                            <a href="team.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700"><i class="fas fa-user-shield mr-2 text-green-600"></i> Leadership Board</a>
+                            <a href="faq.html" class="block px-6 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 border-b"><i class="fas fa-question-circle mr-2 text-green-600"></i> USSD Help (FAQ)</a>
+                            <a href="legal.html" class="block px-6 py-2 text-xs text-gray-400 hover:text-gray-600 italic">Legal & Privacy</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="contact.html" class="text-gray-600 hover:text-green-600 transition">Contact</a>
+                <a href="apply.html" class="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-green-700 transition">Apply Now</a>
+            </div>
+
+            <div class="md:hidden flex items-center">
+                <button id="menu-btn" class="text-gray-600 hover:text-green-600 focus:outline-none p-2">
+                    <i id="menu-icon" class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t absolute w-full shadow-2xl z-[100] max-h-[85vh] overflow-y-auto">
+        <div class="px-4 pt-2 pb-8 space-y-2">
+            <a href="index.html" class="block px-4 py-3 text-base font-bold text-green-700 bg-green-50 rounded-lg">Home</a>
+            <a href="about us.html" class="block px-4 py-3 text-base font-medium text-gray-600">About Us</a>
+            
+            <div class="border-y border-gray-50">
+                <button id="mobile-explore-btn" class="w-full flex justify-between items-center px-4 py-4 text-base font-medium text-gray-600">
+                    <span>Explore Pages</span>
+                    <i id="explore-chevron" class="fas fa-chevron-down text-xs transition-transform"></i>
+                </button>
+                <div id="mobile-explore-content" class="hidden bg-gray-50 rounded-lg mb-2">
+                    <a href="services.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Services</a>
+                    <a href="location.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Locations</a>
+                    <a href="register.html" class="block px-8 py-3 text-sm text-green-700 font-bold border-b border-white">Become a Member</a>
+                    <a href="members.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Members</a>
+                    <a href="impact.html" class="block px-8 py-3 text-sm text-gray-600 border-b border-white">Our Impact</a>
+                    <a href="blog.html" class="block px-8 py-3 text-sm text-gray-600">Financial Insights</a>
+                </div>
+            </div>
+
+            <a href="contact.html" class="block px-4 py-3 text-base font-medium text-gray-600">Contact</a>
+            <div class="pt-4 px-2">
+                <a href="apply.html" class="block w-full text-center bg-green-600 text-white py-4 rounded-xl font-bold">Apply Now</a>
+            </div>
+        </div>
+    </div>
+</nav>
+   <header class="gradient-light py-10 md:py-14 border-b border-green-50 hero-pattern relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.05] pointer-events-none">
+        <img src="https://images.unsplash.com/photo-1500382017468-9049fee74a62?auto=format&fit=crop&q=80&w=2000" alt="Background" class="w-full h-full object-cover">
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 text-center">
+        <div class="inline-flex items-center space-x-2 bg-green-100 px-3 py-1 rounded-full border border-green-200 mb-4">
+            <span class="text-[10px] font-black text-green-700 uppercase tracking-widest uppercase">Financial Inclusion</span>
+        </div>
+        
+        <h1 class="text-3xl md:text-5xl font-black mb-3 uppercase tracking-tighter text-green-900">
+            Empowering Marginalized Farmers
+        </h1>
+        
+        <p class="text-sm md:text-base text-green-800/70 max-w-2xl mx-auto font-medium leading-relaxed">
+            Bridging the gap between agricultural potential and financial accessibility through smart micro-credit solutions.
+        </p>
+    </div>
+</header>
+    <section class="py-20 max-w-7xl mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <div class="animate-fade">
+                <h2 class="text-3xl font-black text-gray-900 mb-8 border-l-8 border-green-500 pl-6 uppercase tracking-tight">Our Mission</h2>
+                <p class="text-gray-600 text-lg leading-relaxed mb-8">
+                    IIG Smart Farmers was founded on the belief that financial barriers should never hinder a farmer's growth. We focus on providing <strong>micro-credit and group banking solutions</strong> specifically designed for low-scale farmers in marginalized societies.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="p-6 bg-white rounded-2xl shadow-sm border-t-4 border-green-500 hover:shadow-md transition">
+                        <h4 class="font-black text-green-700 uppercase text-xs tracking-widest mb-2 text-center">Financial Inclusion</h4>
+                        <p class="text-sm text-gray-500 leading-relaxed">Accessible credit for those without traditional collateral using AI risk models.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-2xl shadow-sm border-t-4 border-green-500 hover:shadow-md transition">
+                        <h4 class="font-black text-green-700 uppercase text-xs tracking-widest mb-2 text-center">Tech-Driven Growth</h4>
+                        <p class="text-sm text-gray-500 leading-relaxed">Leveraging Machine Learning to assess soil health and predict crop productivity.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-[2rem] overflow-hidden shadow-2xl animate-fade relative group h-[500px]" style="animation-delay: 0.2s;">
+                <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&q=80&w=1200" alt="Farmers collaborating in field" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-gray-100 py-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-black text-gray-900 mb-12 uppercase tracking-tighter">Our Corporate Identity</h2>
+            
+            <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-10 transform transition hover:scale-105 duration-300 border border-gray-100">
+                <div class="w-32 h-32 bg-green-100 rounded-full mx-auto mb-6 flex items-center justify-center border-4 border-green-600 shadow-inner">
+                    <i class="fas fa-building text-5xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-black text-gray-900 tracking-tight">IIG SMART FARMERS</h3>
+                <p class="text-green-600 font-bold mb-4 uppercase text-[10px] tracking-[0.2em] mt-2">Private Limited Company</p>
+                <p class="text-gray-600 text-sm leading-relaxed italic">
+                    "Dedicated to transforming marginalized farming societies through the integration of 
+                    <strong>Machine Learning</strong> risk assessments and <strong>Biotechnological</strong> 
+                    excellence."
+                </p>
+                <div class="flex justify-center space-x-6 mt-8 pt-6 border-t border-gray-50">
+                    <a href="#" class="text-gray-400 hover:text-green-600 transition"><i class="fab fa-linkedin text-xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-green-600 transition"><i class="fab fa-twitter text-xl"></i></a>
+                    <a href="mailto:iigsmartfarmersltd@gmail.com" class="text-gray-400 hover:text-green-600 transition"><i class="fas fa-envelope text-xl"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 text-center bg-white">
+        <div class="max-w-3xl mx-auto px-4">
+            <h2 class="text-4xl font-black text-gray-900 mb-6 uppercase tracking-tight">Join Our Growing Community</h2>
+            <p class="text-gray-600 text-lg mb-10 leading-relaxed">Whether you are a farmer looking for support or a partner interested in our mission, we'd love to hear from you.</p>
+            <a href="apply.html" class="bg-green-600 text-white px-12 py-4 rounded-2xl font-black shadow-xl hover:bg-green-700 transition transform hover:-translate-y-1 inline-block uppercase tracking-widest text-sm">
+                Apply for Credit Now
+            </a>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 py-16 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-12 mb-12 border-b border-gray-800 pb-16 text-left">
+            <div class="flex flex-col items-start">
+                <img src="IIG LOGO.jpeg" alt="IIG Logo Footer" class="h-16 mb-6 filter brightness-0 invert opacity-80">
+                <p class="text-sm leading-relaxed">Empowering marginalised farming communities with technology-driven financial solutions through Machine Learning and Biotechnology.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs">Quick Navigation</h4>
+                <ul class="space-y-4 text-sm">
+                    <li><a href="index.html" class="hover:text-white transition">Home</a></li>
+                    <li><a href="services.html" class="hover:text-white transition">Our Services</a></li>
+                    <li><a href="apply.html" class="hover:text-white transition">Application Portal</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs">Reach Out</h4>
+                <ul class="space-y-4 text-sm">
+                    <li class="flex items-center"><i class="fas fa-envelope mr-3 text-green-500"></i>iigsmartfarmersltd@gmail.com</li>
+                    <li class="flex items-center"><i class="fas fa-phone-alt mr-3 text-green-500"></i>0113271924</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-center text-xs opacity-50 font-medium tracking-widest uppercase">&copy; 2025 IIG SMART FARMERS LIMITED. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+    
+    <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const mobileExploreBtn = document.getElementById('mobile-explore-btn');
+    const mobileExploreContent = document.getElementById('mobile-explore-content');
+    const exploreChevron = document.getElementById('explore-chevron');
+
+    // 1. Toggle the Main Mobile Menu (The Hamburger)
+    menuBtn.addEventListener('click', () => {
+        const isHidden = mobileMenu.classList.contains('hidden');
+        if (isHidden) {
+            mobileMenu.classList.remove('hidden');
+            menuIcon.classList.replace('fa-bars', 'fa-times');
+        } else {
+            mobileMenu.classList.add('hidden');
+            menuIcon.classList.replace('fa-times', 'fa-bars');
+        }
+    });
+
+    // 2. Toggle the Mobile "Explore" Accordion
+    mobileExploreBtn.addEventListener('click', () => {
+        mobileExploreContent.classList.toggle('hidden');
+        exploreChevron.classList.toggle('rotate-180');
+    });
+
+    // 3. Reset menu if user resizes window to desktop size
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+            mobileMenu.classList.add('hidden');
+            menuIcon.classList.replace('fa-times', 'fa-bars');
+        }
+    });
+    // Ensure Firebase is initialized before this
+const globalDatabase = firebase.database();
+
+// Function to handle the Popup
+function listenForAnnouncements() {
+    // We listen to the 'activities' node and only grab the latest entry
+    globalDatabase.ref('activities').orderByChild('timestamp').limitToLast(1).on('child_added', (snapshot) => {
+        const data = snapshot.val();
+        
+        // Check if this post is "New" (Posted in the last 10 seconds)
+        // This prevents old posts from popping up every time a page refreshes
+        const postTime = new Date(data.timestamp).getTime();
+        const now = new Date().getTime();
+
+        if (now - postTime < 10000) { // 10-second window
+            triggerPopup(data);
+        }
+    });
+}
+
+function triggerPopup(data) {
+    const modal = document.getElementById('global-popup');
+    const title = document.getElementById('popup-title');
+    const desc = document.getElementById('popup-desc');
+    const mediaContainer = document.getElementById('popup-media');
+
+    title.innerText = data.title;
+    desc.innerText = data.description;
+
+    // Handle Optional Media
+    if (data.media) {
+        mediaContainer.classList.remove('hidden');
+        if (data.mediaType === 'image') {
+            mediaContainer.innerHTML = `<img src="${data.media}" class="w-full h-48 object-cover shadow-inner">`;
+        } else {
+            mediaContainer.innerHTML = `<div class="bg-slate-100 p-4 text-[10px] font-bold text-slate-400 uppercase">New ${data.mediaType} attached</div>`;
+        }
+    } else {
+        mediaContainer.classList.add('hidden');
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeGlobalPopup() {
+    const modal = document.getElementById('global-popup');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Start listening immediately
+listenForAnnouncements();
+</script>
+<div id="global-popup" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-confirm border border-white/20">
+        <div class="gradient-dark p-6 text-white flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-bolt text-yellow-400"></i>
+                <h3 class="font-black uppercase tracking-widest text-xs">New Announcement</h3>
+            </div>
+            <button onclick="closeGlobalPopup()" class="text-white/50 hover:text-white transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="p-8 text-center">
+            <div id="popup-media" class="mb-6 rounded-2xl overflow-hidden hidden"></div>
+            <h2 id="popup-title" class="text-2xl font-black text-slate-900 uppercase tracking-tighter mb-2"></h2>
+            <p id="popup-desc" class="text-slate-600 text-sm leading-relaxed mb-8 italic"></p>
+            
+            <button onclick="closeGlobalPopup()" class="w-full bg-green-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-green-700 transition uppercase tracking-widest text-[10px]">
+                Acknowledge & Continue
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

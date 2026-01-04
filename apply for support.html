@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Support | IIG Smart Farmers Limited</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+    <style>
+        .gradient-green { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        .receipt-border { border: 2px dashed #cbd5e1; }
+        .signature-wrapper { border: 2px solid #e2e8f0; background: #fff; border-radius: 0.75rem; position: relative; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-receipt { animation: slideUp 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="index.html">
+                        <img src="IIG LOGO.jpeg" alt="IIG Logo" class="h-14 md:h-16 w-auto object-contain">
+                    </a>
+                </div>
+                <div class="hidden md:flex space-x-6 items-center text-sm font-medium">
+                    <a href="index.html" class="text-gray-600 hover:text-green-600 transition">Home</a>
+                    <a href="about us.html" class="text-gray-600 hover:text-green-600 transition">About</a>
+                    <div class="relative group h-20 flex items-center">
+                        <button class="flex items-center text-gray-600 hover:text-green-600 transition font-bold">
+                            Explore <i class="fas fa-chevron-down ml-2 text-xs transition-transform group-hover:rotate-180"></i>
+                        </button>
+                        <div class="absolute top-full left-0 w-64 bg-white shadow-xl rounded-b-xl border-t-2 border-green-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all py-4 z-50">
+                            <a href="services.html" class="block px-6 py-2 hover:bg-green-50 text-gray-700 transition">Our Services</a>
+                            <a href="impact.html" class="block px-6 py-2 hover:bg-green-50 text-gray-700 transition">Our Impact</a>
+                            <a href="team.html" class="block px-6 py-2 hover:bg-green-50 text-gray-700 transition">Leadership Board</a>
+                        </div>
+                    </div>
+                    <a href="contact.html" class="text-gray-600 hover:text-green-600 transition">Contact</a>
+                    <a href="apply.html" class="bg-green-600 text-white px-6 py-2 rounded-full font-bold shadow-md">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-green-900 py-16 text-white text-center hero-pattern">
+        <h1 class="text-3xl md:text-5xl font-black uppercase tracking-tight">CGT Service Request</h1>
+        <p class="mt-2 text-green-200 opacity-90 px-4 max-w-2xl mx-auto italic">Official portal for requesting Community Group Trainers (CGTs) and field support.</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        
+        <div id="receipt-ui" class="hidden animate-receipt bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 p-8 md:p-12">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-double text-4xl"></i>
+                </div>
+                <h2 class="text-3xl font-black text-gray-900">Request Dispatched</h2>
+                <p class="text-gray-500">IIG Digital Verification Receipt.</p>
+            </div>
+            <div class="receipt-border rounded-2xl p-6 md:p-10 bg-gray-50 space-y-5">
+                <div class="flex justify-between border-b pb-3">
+                    <span class="text-gray-400 uppercase text-[10px] font-black tracking-widest">Case ID</span>
+                    <span id="receipt-id" class="font-mono font-bold text-green-700"></span>
+                </div>
+                <div class="flex justify-between border-b pb-3">
+                    <span class="text-gray-400 uppercase text-[10px] font-black tracking-widest">Requester</span>
+                    <span id="summary-email" class="text-sm font-bold text-gray-900"></span>
+                </div>
+                <div class="flex justify-between border-b pb-3">
+                    <span class="text-gray-400 uppercase text-[10px] font-black tracking-widest">Location</span>
+                    <span id="summary-location" class="text-sm font-bold text-gray-900 text-right"></span>
+                </div>
+                <div>
+                    <span class="text-gray-400 uppercase text-[10px] font-black tracking-widest">Authorized Signature</span>
+                    <div class="mt-2 border bg-white p-2 rounded-lg">
+                        <img id="receipt-signature-img" src="" alt="Signature" class="max-h-20 mx-auto">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-10">
+                <button onclick="window.print()" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold transition hover:bg-black uppercase tracking-widest text-xs"><i class="fas fa-print mr-2"></i> Save PDF for your Records</button>
+            </div>
+        </div>
+
+        <div id="form-ui" class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+            <div class="p-8 md:p-12">
+                <form id="request-form" class="space-y-6">
+                    <h2 class="text-2xl font-black text-gray-900 mb-8 border-l-4 border-green-500 pl-4 uppercase tracking-tighter">New Service Request</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Full Name</label>
+                            <input type="text" id="f-name" required class="w-full px-4 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Phone Number</label>
+                            <input type="tel" id="f-phone" required class="w-full px-4 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="0700 000 000">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Email Address</label>
+                        <input type="email" id="f-email" required class="w-full px-4 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="farmer@example.com">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Location in Words (County/Sub-County/Ward)</label>
+                        <input type="text" id="f-location" required class="w-full px-4 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="e.g. Kisumu, Kisumu Central, Nyalenda B">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-2 tracking-widest">Why do you need a CGT?</label>
+                        <textarea id="f-details" rows="3" required class="w-full px-4 py-4 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none transition" placeholder="Describe your farm needs or group inquiry..."></textarea>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[10px] font-black uppercase text-gray-400 tracking-widest">Digital Signature (Sign here)</label>
+                            <button type="button" id="clear-sig" class="text-red-500 text-[10px] font-bold uppercase hover:underline">Clear</button>
+                        </div>
+                        <div class="signature-wrapper">
+                            <canvas id="signature-pad" class="w-full h-40"></canvas>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full bg-green-600 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-green-700 transition transform hover:-translate-y-1 uppercase tracking-widest">
+                        Submit Request to AI Core
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 py-12 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <img src="IIG LOGO.jpeg" alt="Logo" class="h-10 filter brightness-0 invert opacity-40 mx-auto mb-4">
+            <p class="text-xs uppercase tracking-[0.3em] font-bold">IIG Smart Farmers Limited &bull; International Private Limited</p>
+        </div>
+    </footer>
+
+    <script>
+        // 1. Firebase Config ( help-me-up-70fcc )
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 2. Signature Pad Logic
+        const canvas = document.getElementById('signature-pad');
+        const signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255, 255, 255)' });
+
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear();
+        }
+        window.onresize = resizeCanvas;
+        resizeCanvas();
+        document.getElementById('clear-sig').onclick = () => signaturePad.clear();
+
+        // 3. Form Handling
+        const form = document.getElementById("request-form");
+        const btn = document.getElementById("submit-btn");
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+
+            if (signaturePad.isEmpty()) {
+                alert("Signature required for authentication.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-sync fa-spin mr-2"></i> Syncing with Records...';
+
+            const refId = "CGT-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+            const sigData = signaturePad.toDataURL();
+            
+            const data = {
+                id: refId,
+                name: document.getElementById("f-name").value,
+                phone: document.getElementById("f-phone").value,
+                email: document.getElementById("f-email").value,
+                location: document.getElementById("f-location").value,
+                details: document.getElementById("f-details").value,
+                signature: sigData,
+                timestamp: new Date().toISOString(),
+                status: "Pending Assignment"
+            };
+
+            // PUSH TO FIREBASE
+            database.ref('records/applications/' + refId).set(data)
+            .then(() => {
+                // Show Receipt UI
+                document.getElementById("summary-email").innerText = data.email;
+                document.getElementById("summary-location").innerText = data.location;
+                document.getElementById("receipt-id").innerText = refId;
+                document.getElementById("receipt-signature-img").src = sigData;
+                
+                document.getElementById("form-ui").classList.add("hidden");
+                document.getElementById("receipt-ui").classList.remove("hidden");
+                window.scrollTo(0, 0);
+            })
+            .catch(err => {
+                alert("Cloud Sync Failure. Check connection.");
+                btn.disabled = false;
+                btn.innerText = "Submit Request to AI Core";
+            });
+        };
+    </script>
+</body>
+</html>

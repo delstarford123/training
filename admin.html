@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Hub Console | IIG SMART FARMERS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        /* Hierarchy UI */
+        .center-node { border-left: 6px solid #10b981; margin-bottom: 1.5rem; border-radius: 1.5rem; overflow: hidden; background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .group-node { border-left: 5px solid #3b82f6; margin-left: 1rem; margin-top: 0.75rem; border-radius: 1rem; background: #f1f5f9; padding: 0.75rem; }
+        .member-node { border-left: 3px solid #cbd5e1; margin-left: 1.5rem; margin-top: 0.5rem; border-radius: 0.75rem; background: white; transition: all 0.2s ease; cursor: pointer; }
+        .member-node:hover { border-color: #10b981; transform: translateX(5px); background: #f0fdf4; }
+        
+        /* Modals & Toggles */
+        .modal-active { display: flex !important; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .rotate-icon { transform: rotate(90deg); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        .tab-active { border-bottom: 3px solid #10b981; color: #064e3b; opacity: 1 !important; }
+        .search-highlight { background-color: #fef08a !important; border: 2px solid #eab308 !important; }
+
+        @media (max-width: 768px) {
+            .center-node { border-left-width: 4px; }
+            .group-node { margin-left: 0.5rem; }
+            .member-node { margin-left: 1rem; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 overflow-x-hidden">
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-green-100 sticky top-0 z-[100] px-4 md:px-6 py-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 bg-green-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+                <h1 class="font-black text-[10px] md:text-xs uppercase tracking-widest text-green-800">Master Hub Console</h1>
+            </div>
+            
+            <div id="auth-status" class="hidden flex items-center space-x-4">
+                <button onclick="toggleNotifications()" class="relative p-3 bg-slate-100 rounded-xl hover:bg-green-100 transition">
+                    <i class="fas fa-bell text-slate-600"></i>
+                    <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+                <button onclick="auth.signOut()" class="text-red-500 font-black text-[10px] uppercase border border-red-100 px-4 py-2 rounded-xl hover:bg-red-50 transition">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-8">
+        
+        <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden mt-12 border">
+            <div class="gradient-dark p-10 text-white text-center hero-pattern">
+                <i class="fas fa-shield-halved text-5xl text-green-400 mb-4"></i>
+                <h2 class="text-2xl font-black uppercase tracking-widest">Secure Gateway</h2>
+            </div>
+            <form id="login-form" class="p-8 space-y-5">
+                <input type="email" id="admin-email" placeholder="Email" class="w-full p-4 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 font-bold" required>
+                <input type="password" id="admin-password" placeholder="Access Key" class="w-full p-4 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 font-bold" required>
+                <button type="submit" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl shadow-xl hover:bg-green-700 transition uppercase text-sm">Sync Terminal</button>
+            </form>
+        </div>
+
+        <div id="dashboard-ui" class="hidden space-y-8">
+            
+            <div class="flex overflow-x-auto pb-2 gap-3 no-scrollbar">
+                <a href="cgt access.html" class="flex-shrink-0 bg-indigo-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase flex items-center shadow-lg"><i class="fas fa-tower-broadcast mr-2"></i> CGT Terminal</a>
+                <a href="post.html" class="flex-shrink-0 bg-green-600 text-white px-5 py-3 rounded-2xl text-[10px] font-black uppercase flex items-center shadow-lg"><i class="fas fa-plus mr-2"></i> New Post</a>
+                <button onclick="expandAll()" class="flex-shrink-0 bg-slate-200 px-5 py-3 rounded-2xl text-[10px] font-black uppercase shadow-sm">Expand All</button>
+                <button onclick="collapseAll()" class="flex-shrink-0 bg-slate-200 px-5 py-3 rounded-2xl text-[10px] font-black uppercase shadow-sm">Hide All</button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total Members</p><h3 id="stat-members" class="text-2xl font-black mt-1">0</h3></div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm"><p class="text-[8px] font-black text-blue-500 uppercase tracking-widest">Master MSA</p><h3 id="stat-total-msa" class="text-lg font-black mt-1 text-blue-600">KSh 0</h3></div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm"><p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Personal Nodes</p><h3 id="stat-total-psa" class="text-lg font-black mt-1 text-indigo-600">KSh 0</h3></div>
+                <div class="bg-purple-900 p-5 rounded-3xl text-white shadow-xl"><p class="text-[8px] font-black text-purple-300 uppercase tracking-widest">Active Staff</p><h3 id="stat-cgts" class="text-2xl font-black text-purple-400">0</h3></div>
+                <div class="bg-slate-900 p-5 rounded-3xl text-white shadow-xl col-span-2 md:col-span-1"><p class="text-[8px] font-black text-white/40 uppercase tracking-widest">Agg Liquidity</p><h3 id="stat-total-gca" class="text-xl font-black text-green-400">KSh 0</h3></div>
+            </div>
+
+            <div id="notif-panel" class="hidden bg-white rounded-[2rem] border-2 border-green-500 shadow-2xl p-6 md:p-8">
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <div class="flex space-x-6">
+                        <button onclick="switchReqTab('farmer')" id="tab-farmer" class="font-black uppercase text-xs tracking-widest pb-2 tab-active transition">Farmer Onboarding</button>
+                        <button onclick="switchReqTab('cgt')" id="tab-cgt" class="font-black uppercase text-xs tracking-widest pb-2 text-slate-400 hover:text-purple-600 transition">Staff Requests</button>
+                    </div>
+                    <button onclick="toggleNotifications()" class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="request-list" class="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar"></div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400">Active CGT Staff Nodes</h2>
+                <div id="cgt-list" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <h2 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Organization Architect</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="p-6 bg-green-50 rounded-3xl border border-green-100">
+                        <p class="text-[9px] font-black uppercase mb-3 text-green-700">Add Hub Hub (Center)</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-center-name" placeholder="Hub Name" class="flex-1 p-3 rounded-xl border text-xs font-bold uppercase outline-none">
+                            <button onclick="createCenter()" class="bg-green-700 text-white px-5 rounded-xl text-[9px] font-black uppercase">Add</button>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-blue-50 rounded-3xl border border-blue-100">
+                        <p class="text-[9px] font-black uppercase mb-3 text-blue-700">Add Sub-Group</p>
+                        <div class="space-y-2">
+                            <select id="parent-center-select" class="w-full p-3 rounded-xl border text-xs font-bold bg-white outline-none"></select>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-group-name" placeholder="Group Name" class="flex-1 p-3 rounded-xl border text-xs font-bold uppercase outline-none">
+                                <button onclick="createGroup()" class="bg-blue-700 text-white px-5 rounded-xl text-[9px] font-black uppercase">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
+                    <h2 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Hierarchy Master Lookup</h2>
+                    <input type="text" id="master-search" oninput="filterHierarchy()" placeholder="Search name or phone..." class="w-full md:w-64 pl-5 pr-4 py-3 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 text-xs font-bold transition-all">
+                </div>
+                <div id="hierarchy-tree" class="space-y-4 pb-10 max-h-[100vh] overflow-y-auto custom-scrollbar pr-2"></div>
+            </div>
+        </div>
+    </main>
+
+    <div id="details-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-xl z-[200] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="gradient-dark p-6 md:p-8 text-white flex justify-between items-center hero-pattern">
+                <div class="text-left">
+                    <h3 id="modal-name" class="text-xl md:text-3xl font-black uppercase tracking-tighter leading-none">Identity Node</h3>
+                    <p id="modal-id" class="text-[10px] text-green-400 font-mono tracking-widest mt-2 uppercase"></p>
+                </div>
+                <button onclick="closeModal()" class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="modal-body" class="p-6 md:p-10 space-y-8 overflow-y-auto custom-scrollbar bg-slate-50"></div>
+
+            <div class="p-6 bg-white border-t flex justify-between items-center">
+                <p class="hidden md:block text-[9px] text-slate-400 font-black uppercase tracking-widest">IIG Strategic Accountability Data Record</p>
+                <button onclick="window.print()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase flex items-center shadow-lg"><i class="fas fa-print mr-2"></i> Export Ledger</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl space-y-6">
+            <div class="text-center">
+                <div class="h-16 w-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner"><i class="fas fa-user-plus"></i></div>
+                <h3 id="assign-title" class="text-xl font-black text-slate-800 uppercase tracking-tight">Finalize Enrollment</h3>
+                <p class="text-[10px] text-slate-400 font-bold uppercase mt-1">Routing Node to Strategic Hub</p>
+            </div>
+
+            <div id="assign-preview" class="p-4 bg-slate-50 rounded-2xl border text-[11px] font-bold text-slate-600 leading-relaxed shadow-inner"></div>
+            
+            <div id="farmer-assign-fields" class="space-y-4">
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Assign Ward Hub</label>
+                    <select id="assign-center" class="w-full p-4 rounded-xl border mt-1 font-bold text-sm outline-none focus:ring-2 focus:ring-green-500" onchange="filterAssignGroups()"></select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Assign Field Group</label>
+                    <select id="assign-group" class="w-full p-4 rounded-xl border mt-1 font-bold text-sm outline-none focus:ring-2 focus:ring-green-500"></select>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button onclick="closeAssignModal()" class="flex-1 py-4 bg-slate-100 rounded-2xl font-black uppercase text-[10px] text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                <button id="final-approve-btn" class="flex-1 py-4 bg-green-600 text-white rounded-2xl font-black uppercase text-[10px] shadow-lg shadow-green-100 hover:bg-green-700 transition">Finalize Node</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        let db_centers = {}, db_groups = {}, db_members = {}, db_audits = {}, db_requests = {}, db_cgt_requests = {}, db_cgts = {};
+        let currentRequestId = null, activeTab = 'farmer';
+
+        const safeNum = (v) => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+
+        // Security Authentication
+        auth.onAuthStateChanged(user => {
+            const whitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+            if (user && whitelist.includes(user.email)) {
+                document.getElementById('login-ui').classList.add('hidden');
+                document.getElementById('dashboard-ui').classList.remove('hidden');
+                document.getElementById('auth-status').classList.remove('hidden');
+                startAdminListeners();
+            } else {
+                document.getElementById('login-ui').classList.remove('hidden');
+                document.getElementById('dashboard-ui').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('login-form').onsubmit = (e) => {
+            e.preventDefault();
+            auth.signInWithEmailAndPassword(document.getElementById('admin-email').value, document.getElementById('admin-password').value).catch(err => alert(err.message));
+        };
+
+        // Real-time Master Listeners
+        function startAdminListeners() {
+            database.ref('organization/centers').on('value', s => { db_centers = s.val() || {}; updateArchitectDropdowns(); buildTree(); });
+            database.ref('organization/groups').on('value', s => { db_groups = s.val() || {}; buildTree(); });
+            database.ref('records/members').on('value', s => { db_members = s.val() || {}; buildTree(); });
+            database.ref('records/audits').on('value', s => { db_audits = s.val() || {}; buildTree(); });
+            database.ref('requests/onboarding').on('value', s => { db_requests = s.val() || {}; renderPendingRequests(); });
+            database.ref('requests/cgt_onboarding').on('value', s => { db_cgt_requests = s.val() || {}; renderPendingRequests(); });
+            database.ref('records/cgts').on('value', s => { 
+                db_cgts = s.val() || {}; renderCGTList();
+                document.getElementById('stat-cgts').innerText = Object.keys(db_cgts).length;
+            });
+        }
+
+        // Aggregate Totals & Hierarchy Tree
+        function buildTree() {
+            const tree = document.getElementById('hierarchy-tree');
+            tree.innerHTML = "";
+            let sums = { gca: 0, msa: 0, psa: 0, count: 0 };
+
+            Object.entries(db_centers).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([cId, center]) => {
+                const centerGroups = Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cId);
+                let centerGCA = 0;
+
+                let groupHtml = centerGroups.map(([gId, group]) => {
+                    const groupMembers = Object.entries(db_members).filter(([_, m]) => m.groupId === gId);
+                    let groupTotal = 0;
+
+                    let memberHtml = groupMembers.map(([mId, m]) => {
+                        sums.count++;
+                        const audits = Object.values(db_audits).filter(a => a.farmerPhone === m.phone);
+                        const f = audits[audits.length - 1]?.financials || {};
+                        const msaVal = safeNum(f.msa)+safeNum(f.gff)+safeNum(f.gmf);
+                        const psaVal = safeNum(f.psa)+safeNum(f.afs)+safeNum(f.fis);
+                        const mTotal = msaVal + psaVal;
+                        sums.msa += msaVal; sums.psa += psaVal; sums.gca += mTotal; groupTotal += mTotal;
+                        return `
+                            <div onclick="openInspector('${mId}')" class="member-node p-4 border border-slate-100 flex justify-between items-center" data-name="${m.name.toLowerCase()}" data-phone="${m.phone}">
+                                <div class="leading-tight"><p class="font-black text-[11px] uppercase">${m.name}</p><p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">${m.phone}</p></div>
+                                <p class="text-[10px] font-black text-green-700">KSh ${mTotal.toLocaleString()}</p>
+                            </div>`;
+                    }).join('');
+                    centerGCA += groupTotal;
+                    return `
+                        <div class="group-node border border-slate-200">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="toggleNode('node-${gId}')">
+                                <div class="flex items-center"><i id="icon-node-${gId}" class="fas fa-chevron-right mr-3 text-blue-500 transition-transform"></i><h4 class="font-black text-xs uppercase">${group.name}</h4></div>
+                                <div class="bg-slate-900 text-white px-3 py-1 rounded-full text-[8px] font-black tracking-widest">KSh ${groupTotal.toLocaleString()}</div>
+                            </div>
+                            <div id="node-${gId}" class="hidden mt-3 space-y-1">${memberHtml || '<p class="text-center italic text-slate-400 text-[8px] p-2">Empty Group</p>'}</div>
+                        </div>`;
+                }).join('');
+
+                tree.innerHTML += `
+                    <div class="center-node">
+                        <div class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition" onclick="toggleNode('node-${cId}')">
+                            <div class="flex items-center"><i id="icon-node-${cId}" class="fas fa-chevron-down mr-4 text-green-600"></i><h3 class="text-lg font-black uppercase text-slate-800">${center.name} Hub</h3></div>
+                            <div class="text-right"><p class="text-sm font-black tracking-tight">KSh ${centerGCA.toLocaleString()}</p></div>
+                        </div>
+                        <div id="node-${cId}" class="px-5 pb-5">${groupHtml || '<p class="text-center italic text-slate-400 text-[9px] p-4">No groups assigned</p>'}</div>
+                    </div>`;
+            });
+            document.getElementById('stat-members').innerText = sums.count;
+            document.getElementById('stat-total-msa').innerText = `KSh ${sums.msa.toLocaleString()}`;
+            document.getElementById('stat-total-psa').innerText = `KSh ${sums.psa.toLocaleString()}`;
+            document.getElementById('stat-total-gca').innerText = `KSh ${sums.gca.toLocaleString()}`;
+        }
+
+        // Inspector System
+        function openInspector(mId) {
+            const m = db_members[mId];
+            if(!m) return;
+            const audits = Object.values(db_audits)
+                .filter(a => a.farmerPhone === m.phone)
+                .sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+            
+            const latest = audits[0]?.financials || {};
+            const aggregateNow = Object.values(latest).reduce((acc,cur)=>acc+safeNum(cur), 0);
+            
+            document.getElementById('modal-name').innerText = m.name;
+            document.getElementById('modal-id').innerText = `Registry identity: ${m.phone}`;
+
+            const inspectorHtml = `
+                <div class="mb-8 p-10 bg-emerald-900 rounded-[2.5rem] text-center text-white shadow-2xl relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10 hero-pattern"></div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400 mb-2">Verified Aggregate Liquidity</p>
+                    <h2 class="text-5xl md:text-7xl font-black tracking-tighter">KSh ${aggregateNow.toLocaleString()}</h2>
+                    <p class="mt-4 text-[9px] font-bold text-emerald-300 uppercase opacity-60">Identity Data Packet Certified</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div class="p-8 bg-white rounded-3xl border border-slate-200 shadow-sm">
+                        <p class="text-[9px] font-black uppercase text-slate-400 mb-6 border-b pb-2 tracking-widest">Latest Ledger Snapshot</p>
+                        <div class="grid grid-cols-2 gap-4 text-xs font-bold text-slate-700">
+                            <div class="p-4 bg-blue-50 rounded-2xl"><p class="text-[8px] uppercase text-blue-500 mb-1">MSA</p><p class="text-sm">KSh ${safeNum(latest.msa).toLocaleString()}</p></div>
+                            <div class="p-4 bg-indigo-50 rounded-2xl"><p class="text-[8px] uppercase text-indigo-500 mb-1">PSA</p><p class="text-sm">KSh ${safeNum(latest.psa).toLocaleString()}</p></div>
+                            <div class="p-4 bg-slate-50 rounded-2xl"><p class="text-[8px] uppercase text-slate-500 mb-1">GFF</p><p class="text-sm">KSh ${safeNum(latest.gff).toLocaleString()}</p></div>
+                            <div class="p-4 bg-slate-50 rounded-2xl"><p class="text-[8px] uppercase text-slate-500 mb-1">GMF</p><p class="text-sm">KSh ${safeNum(latest.gmf).toLocaleString()}</p></div>
+                            <div class="p-4 bg-slate-50 rounded-2xl"><p class="text-[8px] uppercase text-slate-500 mb-1">AFS</p><p class="text-sm">KSh ${safeNum(latest.afs).toLocaleString()}</p></div>
+                            <div class="p-4 bg-slate-50 rounded-2xl"><p class="text-[8px] uppercase text-slate-500 mb-1">FIS</p><p class="text-sm">KSh ${safeNum(latest.fis).toLocaleString()}</p></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-8 bg-white rounded-3xl border border-slate-200 shadow-sm">
+                        <p class="text-[9px] font-black uppercase text-slate-400 mb-6 border-b pb-2 tracking-widest">Credentials Record</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2"><p class="text-[8px] font-black text-center text-slate-400 uppercase">ID Front</p><img src="${m.idFront}" class="rounded-2xl border shadow-sm h-40 w-full object-cover cursor-zoom-in" onclick="window.open(this.src)"></div>
+                            <div class="space-y-2"><p class="text-[8px] font-black text-center text-slate-400 uppercase">ID Back</p><img src="${m.idBack}" class="rounded-2xl border shadow-sm h-40 w-full object-cover cursor-zoom-in" onclick="window.open(this.src)"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 mb-8 ml-2 flex items-center"><i class="fas fa-history mr-3 text-emerald-600"></i> Full Historical Audit Logs</h3>
+
+                <div class="space-y-6 pb-20">
+                ${audits.map(a => {
+                    const f = a.financials || {};
+                    return `
+                    <div class="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm transition-all hover:shadow-md">
+                        <div class="bg-slate-900 px-8 py-4 flex justify-between items-center">
+                            <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none">SYNC: ${new Date(a.timestamp).toLocaleString()}</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">OFFICER: ${a.officer || 'SYSTEM'}</span>
+                        </div>
+                        <div class="p-8 flex flex-col md:flex-row gap-10">
+                            <div class="shrink-0 text-center">
+                                <p class="text-[8px] font-black text-slate-300 uppercase mb-2">Field Evidence</p>
+                                <img src="${a.verificationMedia}" class="h-40 w-40 object-cover rounded-[2.5rem] border-4 border-white shadow-lg cursor-zoom-in" onclick="window.open(this.src)">
+                            </div>
+                            <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><p class="text-[7px] font-black text-blue-600 uppercase mb-1 tracking-widest">MSA</p><p class="text-sm font-black text-slate-800">KSh ${safeNum(f.msa).toLocaleString()}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><p class="text-[7px] font-black text-indigo-600 uppercase mb-1 tracking-widest">PSA</p><p class="text-sm font-black text-slate-800">KSh ${safeNum(f.psa).toLocaleString()}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><p class="text-[7px] font-black text-slate-400 uppercase mb-1 tracking-widest">GFF</p><p class="text-sm font-black text-slate-800">KSh ${safeNum(f.gff).toLocaleString()}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><p class="text-[7px] font-black text-slate-400 uppercase mb-1 tracking-widest">GMF</p><p class="text-sm font-black text-slate-800">KSh ${safeNum(f.gmf).toLocaleString()}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><p class="text-[7px] font-black text-slate-400 uppercase mb-1 tracking-widest">AFS</p><p class="text-sm font-black text-slate-800">KSh ${safeNum(f.afs).toLocaleString()}</p></div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100"><p class="text-[7px] font-black text-slate-400 uppercase mb-1 tracking-widest">FIS</p><p class="text-sm font-black text-slate-800">KSh ${safeNum(f.fis).toLocaleString()}</p></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 px-8 py-3 text-right border-t">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Certified Sync Total: <span class="text-slate-900 ml-2">KSh ${Object.values(f).reduce((acc,cur)=>acc+safeNum(cur), 0).toLocaleString()}</span></p>
+                        </div>
+                    </div>`;
+                }).join('') || '<div class="text-center py-20 bg-slate-50 rounded-[3rem] border-2 border-dashed"><p class="text-slate-400 font-black italic uppercase text-[10px]">No historical synchronization packets detected.</p></div>'}
+                </div>
+            `;
+            document.getElementById('modal-body').innerHTML = inspectorHtml;
+            document.getElementById('details-modal').classList.add('modal-active');
+        }
+
+        // Onboarding / Notification Management
+        function switchReqTab(tab) {
+            activeTab = tab;
+            document.getElementById('tab-farmer').classList.toggle('tab-active', tab === 'farmer');
+            document.getElementById('tab-cgt').classList.toggle('tab-active', tab === 'cgt');
+            renderPendingRequests();
+        }
+
+        function renderPendingRequests() {
+            const list = document.getElementById('request-list');
+            const dataSource = activeTab === 'farmer' ? db_requests : db_cgt_requests;
+            list.innerHTML = "";
+            
+            Object.entries(dataSource).forEach(([id, r]) => {
+                list.innerHTML += `
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 group transition-hover hover:border-green-500">
+                        <div class="flex items-center gap-3">
+                            <div class="relative h-12 w-12 shrink-0">
+                                <img src="${r.idFront}" class="h-full w-full object-cover rounded-xl border-2 border-white shadow-sm cursor-zoom-in" onclick="window.open(this.src)">
+                                <div class="absolute -top-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+                            </div>
+                            <div class="leading-none">
+                                <p class="font-black text-[11px] uppercase text-slate-800">${r.name}</p>
+                                <p class="text-[8px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">${r.geo?.village || r.phone}</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                             <button onclick="openAssignModal('${id}', '${activeTab}')" class="h-9 w-9 flex items-center justify-center bg-white text-green-600 rounded-xl border border-green-200 shadow-sm hover:bg-green-600 hover:text-white transition-all"><i class="fas fa-check"></i></button>
+                             <button onclick="denyRequest('${id}', '${activeTab}')" class="h-9 w-9 flex items-center justify-center bg-white text-red-500 rounded-xl border border-red-100 shadow-sm hover:bg-red-500 hover:text-white transition-all"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>`;
+            });
+            
+            let total = Object.keys(db_requests).length + Object.keys(db_cgt_requests).length;
+            document.getElementById('notif-count').innerText = total;
+            document.getElementById('notif-count').classList.toggle('hidden', total === 0);
+            document.getElementById('notif-badge').innerText = total;
+            document.getElementById('notif-badge').classList.toggle('hidden', total === 0);
+        }
+
+        // Enrollment Action Logic
+        function openAssignModal(id, type) {
+            currentRequestId = id;
+            const r = type === 'farmer' ? db_requests[id] : db_cgt_requests[id];
+            document.getElementById('assign-preview').innerHTML = `<p class="text-slate-400 uppercase tracking-widest text-[8px] mb-1 font-black">Member Identity</p><p class="text-sm font-black text-slate-800">${r.name}</p><p class="text-[10px] text-indigo-600 font-bold">${r.phone}</p>`;
+            
+            const farmerFields = document.getElementById('farmer-assign-fields');
+            farmerFields.classList.toggle('hidden', type !== 'farmer');
+            
+            if(type === 'farmer') {
+                let opts = '<option value="">Select Ward Hub...</option>';
+                Object.entries(db_centers).forEach(([cid, c]) => opts += `<option value="${cid}">${c.name}</option>`);
+                document.getElementById('assign-center').innerHTML = opts;
+                document.getElementById('assign-group').innerHTML = '<option value="">(Select Hub First)</option>';
+                document.getElementById('final-approve-btn').onclick = finalizeFarmer;
+            } else {
+                document.getElementById('final-approve-btn').onclick = finalizeCGT;
+            }
+            
+            document.getElementById('assign-modal').classList.add('modal-active');
+            document.getElementById('assign-modal').classList.remove('hidden');
+        }
+
+        async function finalizeFarmer() {
+            const cid = document.getElementById('assign-center').value;
+            const gid = document.getElementById('assign-group').value;
+            if(!cid || !gid) return alert("Assignment to Ward Hub and Field Group is mandatory.");
+            
+            const r = db_requests[currentRequestId];
+            const memberID = "IIG-M-" + Math.floor(1000 + Math.random() * 9000);
+            
+            try {
+                await database.ref('records/members').push({ ...r, centerId: cid, groupId: gid, memberID, status: 'active', approvedAt: Date.now() });
+                await database.ref(`requests/onboarding/${currentRequestId}`).remove();
+                closeAssignModal();
+            } catch (err) { alert(err.message); }
+        }
+
+        async function finalizeCGT() {
+            const r = db_cgt_requests[currentRequestId];
+            try {
+                await database.ref('records/cgts').push({ ...r, status: 'active', approvedAt: Date.now() });
+                await database.ref(`requests/cgt_onboarding/${currentRequestId}`).remove();
+                closeAssignModal();
+            } catch (err) { alert(err.message); }
+        }
+
+        async function denyRequest(id, type) {
+            if(confirm("Permanently deny and purge this identity node?")) {
+                const path = type === 'farmer' ? `requests/onboarding/${id}` : `requests/cgt_onboarding/${id}`;
+                await database.ref(path).remove();
+            }
+        }
+
+        // Logic Helpers
+        function renderCGTList() {
+            document.getElementById('cgt-list').innerHTML = Object.entries(db_cgts).map(([id, c]) => `
+                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 flex items-center gap-3 shadow-sm">
+                    <img src="${c.personPhoto || 'https://via.placeholder.com/100'}" class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md">
+                    <div><p class="font-black text-[10px] uppercase text-slate-800">${c.name}</p><p class="text-[8px] text-purple-600 font-bold uppercase tracking-widest">${c.geo?.nearestSchool || 'Field Station'}</p></div>
+                </div>`).join('');
+        }
+
+        function createCenter() {
+            const name = document.getElementById('new-center-name').value.trim();
+            if(name) database.ref('organization/centers').push({ name: name.toUpperCase() });
+            document.getElementById('new-center-name').value = "";
+        }
+
+        function createGroup() {
+            const name = document.getElementById('new-group-name').value.trim();
+            const parent = document.getElementById('parent-center-select').value;
+            if(name && parent) database.ref('organization/groups').push({ name: name.toUpperCase(), parentCenter: parent });
+            document.getElementById('new-group-name').value = "";
+        }
+
+        function updateArchitectDropdowns() {
+            let opts = '<option value="">Target Hub Module...</option>';
+            Object.entries(db_centers).forEach(([id, c]) => opts += `<option value="${id}">${c.name}</option>`);
+            document.getElementById('parent-center-select').innerHTML = opts;
+        }
+
+        function filterAssignGroups() {
+            const cid = document.getElementById('assign-center').value;
+            let opts = '<option value="">Select Field Group...</option>';
+            Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cid).forEach(([gid, g]) => opts += `<option value="${gid}">${g.name}</option>`);
+            document.getElementById('assign-group').innerHTML = opts;
+        }
+
+        function filterHierarchy() {
+            const term = document.getElementById('master-search').value.toLowerCase().trim();
+            document.querySelectorAll('.member-node').forEach(node => {
+                const match = node.dataset.name.includes(term) || node.dataset.phone.includes(term);
+                node.classList.toggle('hidden', !match);
+                if (match && term !== "") {
+                    node.classList.add('search-highlight');
+                    let p = node.closest('[id^="node-"]');
+                    while(p) { p.classList.remove('hidden'); p = p.parentElement.closest('[id^="node-"]'); }
+                } else node.classList.remove('search-highlight');
+            });
+        }
+
+        // General UI Controls
+        function toggleNotifications() { document.getElementById('notif-panel').classList.toggle('hidden'); }
+        function closeModal() { document.getElementById('details-modal').classList.remove('modal-active'); }
+        function closeAssignModal() { document.getElementById('assign-modal').classList.add('hidden'); document.getElementById('assign-modal').classList.remove('modal-active'); }
+        function toggleNode(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById('icon-'+id)?.classList.toggle('rotate-icon'); }
+        function expandAll() { document.querySelectorAll('[id^="node-"]').forEach(n => n.classList.remove('hidden')); }
+        function collapseAll() { document.querySelectorAll('[id^="node-"]').forEach(n => n.classList.add('hidden')); }
+    </script>
+</body>
+</html>

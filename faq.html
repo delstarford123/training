@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ | IIG Smart Farmers Limited</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-green { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+    </style>
+    <script src="chat.js" defer></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="index.html" class="flex items-center">
+                        <img src="IIG LOGO.jpeg" alt="IIG Smart Farmers Limited Logo" class="h-14 md:h-16 w-auto object-contain">
+                    </a>
+                </div>
+
+                <div class="hidden md:flex space-x-6 items-center text-sm font-medium">
+                    <a href="index.html" class="text-gray-600 hover:text-green-600 transition">Home</a>
+                    <a href="about us.html" class="text-gray-600 hover:text-green-600 transition">About</a>
+                    
+                    <div class="relative group h-20 flex items-center">
+                        <button class="flex items-center text-green-600 font-bold transition font-medium">
+                            Explore <i class="fas fa-chevron-down ml-2 text-xs transition-transform group-hover:rotate-180"></i>
+                        </button>
+                        
+                        <div class="absolute top-full left-0 w-64 bg-white shadow-xl rounded-b-xl border-t-2 border-green-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 py-4 z-50">
+                            <div class="px-4 pb-2 text-[10px] uppercase tracking-widest text-gray-400 font-black">Core Operations</div>
+                            <a href="services.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-seedling mr-3 text-green-600 w-4"></i> Our Services</a>
+                            <a href="location.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-map-marker-alt mr-3 text-green-600 w-4"></i> Locations</a>
+                            
+                            <div class="px-4 pt-4 pb-2 text-[10px] uppercase tracking-widest text-gray-400 font-black border-t border-gray-50 mt-2">Community & Impact</div>
+                            <a href="members.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-users mr-3 text-green-600 w-4"></i> Our Members</a>
+                            <a href="impact.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-chart-line mr-3 text-green-600 w-4"></i> Our Impact</a>
+                            <a href="blog.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-microscope mr-3 text-green-600 w-4"></i> Financial Insights</a>
+
+                            <div class="px-4 pt-4 pb-2 text-[10px] uppercase tracking-widest text-gray-400 font-black border-t border-gray-50 mt-2">Governance & Help</div>
+                            <a href="team.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-user-shield mr-3 text-green-600 w-4"></i> Leadership Board</a>
+                            <a href="faq.html" class="block px-6 py-2 text-sm text-green-700 bg-green-50 font-bold transition"><i class="fas fa-question-circle mr-3 text-green-600 w-4"></i> USSD Help (FAQ)</a>
+                            <a href="help.html" class="block px-6 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"><i class="fas fa-headset mr-3 text-green-600 w-4"></i> Help Center</a>
+                        </div>
+                    </div>
+
+                    <a href="contact.html" class="text-gray-600 hover:text-green-600 transition">Contact</a>
+                    <a href="apply.html" class="bg-green-600 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-green-700 transition shadow-md">Apply Now</a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button id="menu-btn" class="text-gray-600 hover:text-green-600 focus:outline-none p-2 bg-gray-50 rounded-lg">
+                        <i id="menu-icon" class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="gradient-green py-20 text-white hero-pattern">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter">Knowledge Base</h1>
+            <p class="text-lg opacity-90 max-w-2xl mx-auto">Providing clear answers to empower our small-scale farming community.</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-16">
+        
+        <div class="space-y-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How do I register as a new member?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    The easiest way to register is via your mobile phone. Simply dial <span class="font-black text-green-700">*789*7777#</span> and follow the prompts. No internet is required.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What documents are required for a loan?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    To begin the AI Risk Assessment, you will need to provide a clear photo of your **National ID** and a valid **Email Address**.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Can I request both Organic and Inorganic fertilizers?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Yes. IIG Smart Farmers Limited provides access to both. Our biotechnology experts can advise which is best for your specific soil type.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What is "Group Banking"?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Group Banking allows farmers in marginalized societies to pool resources, creating collective security for larger credits.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Is there a registration fee?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    No, dialling <span class="font-bold">*789*7777#</span> to create your basic profile is free. Only specific financial services may have small administrative fees.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Who is eligible for IIG Smart Farmers support?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    We prioritize small-scale farmers in marginalized societies who lack access to traditional banking collateral.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How does the AI Risk Assessment work?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Our Machine Learning models analyze soil health data, weather patterns, and market history to predict your farm's productivity and repayment ability.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What are the interest rates for micro-credit?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Our rates are highly competitive and tailored to be lower than traditional bank loans to ensure farmer growth and sustainability.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What is the role of a Community Group Trainer (CGT)?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    CGTs are our field officers who provide hands-on training, soil testing assistance, and facilitate group banking meetings.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What happens if my harvest fails due to drought?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Our AI models monitor weather. In cases of certified environmental disaster, we work with groups to reschedule loan repayments.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How long does loan approval take?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Once all data (ID and email) is verified, our AI assessment typically provides a decision within 48 to 72 business hours.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Can I use the USSD code on any phone?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Yes. The USSD system is designed to work on both "Kabambe" basic phones and smartphones without requiring internet.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How is my data kept safe?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    We use end-to-end encryption for all National ID submissions and adhere to international data protection privacy laws.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What are the WhatsApp bot triggers 700, 800, and 900?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Text 700 for Services, 900 to Learn Operations, and 800 is reserved for internal Community Group Trainers (CGTs).
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How do I receive my fertilizer inputs?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Inputs are distributed through our regional hubs. You will receive a WhatsApp/SMS notification when your order is ready for pickup.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Does IIG offer soil testing services?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Yes. Part of our Biotech Insights service includes professional soil analysis to ensure you are using the correct fertilizer for your land.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Can I apply for support as an individual?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    While we allow individual registration, our financial model is strongest for groups of 5 or more farmers working together.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How do I track my loan application?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    You can track status in real-time by dialling *789*7777# or by chatting with our Bot and selecting "Track my Application".
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Does IIG work with international partners?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Yes. We are registering as an International Private Limited Company and welcome global biotech and fintech partnerships.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Can I repay my loan early?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Yes. Early repayment is encouraged and will positively impact your AI credit score for future, larger loan requests.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">What are your office hours?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Our digital systems (USSD & Bot) are 24/7. Human support and head office inquiries are handled Monday-Friday, 8 AM - 5 PM.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">How do I report a field officer or CGT?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Please visit our Help Center** page and fill out the "Formal Service Report" form to submit direct feedback to management.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Can I change my registered phone number?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    For security reasons, phone number changes must be verified by a Community Group Trainer (CGT) in person.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button class="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition" onclick="toggleFaq(this)">
+                    <span class="font-bold text-gray-900">Where can I see the impact of my farming group?</span>
+                    <i class="fas fa-plus text-green-600 transition-transform"></i>
+                </button>
+                <div class="hidden p-6 pt-0 text-gray-600 text-sm leading-relaxed border-t border-gray-50">
+                    Check our Impact Report** page to see collective data on membership growth and yield increases across marginalized communities.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-16 bg-green-50 rounded-3xl p-8 md:p-12 text-center border border-green-100">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
+            <p class="text-gray-600 mb-8">Our AI assistant is available 24/7 to help you with technical or operational inquiries.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="help.html" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-lg">Open Help Center</a>
+                <a href="https://wa.me/254113271924" class="bg-white text-green-700 px-8 py-3 rounded-xl font-bold border border-green-200 hover:bg-green-50 transition">Chat with Bot</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 py-12 text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8 mb-8 border-b border-gray-800 pb-12">
+            <div class="flex flex-col items-start">
+                <img src="IIG LOGO.jpeg" alt="IIG Logo Footer" class="h-16 mb-4 filter brightness-0 invert opacity-80">
+                <p class="text-sm text-left">Empowering marginalised farming communities with technology-driven financial solutions.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4">Direct Links</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="index.html" class="hover:text-white transition">Home</a></li>
+                    <li><a href="services.html" class="hover:text-white transition">Our Services</a></li>
+                    <li><a href="register.html" class="hover:text-white transition">USSD Registration</a></li>
+                    <li><a href="legal.html" class="hover:text-white transition uppercase text-[10px] font-bold">Legal & Privacy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-semibold mb-4 uppercase tracking-widest text-xs">Reach Out</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><i class="fas fa-envelope mr-2"></i>iigsmartfarmersltd@gmail.com</li>
+                    <li><i class="fas fa-phone mr-2"></i>0113271924</li>
+                </ul>
+            </div>
+        </div>
+        <p class="text-center text-xs opacity-50">&copy; 2025 IIG Smart Farmers Limited.</p>
+    </footer>
+
+    <script>
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('i');
+            const isHidden = content.classList.contains('hidden');
+            
+            // Toggle Content
+            content.classList.toggle('hidden');
+            
+            // Rotate Icon
+            if (isHidden) {
+                icon.classList.remove('fa-plus');
+                icon.classList.add('fa-minus');
+            } else {
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+            }
+        }
+
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        menuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.replace('fa-bars', 'fa-times');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Enrollment | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .gradient-green { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        .input-group { @apply space-y-2; }
+        .form-card { @apply bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm transition-all duration-300; }
+        .form-card:focus-within { @apply border-green-500 ring-4 ring-green-50; }
+        
+        input, select { @apply w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none focus:bg-white focus:border-green-500 font-bold text-sm transition-all; }
+        label { @apply text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2; }
+
+        #signature-pad { border: 2px dashed #cbd5e1; background: #f8fafc; cursor: crosshair; touch-action: none; border-radius: 2rem; }
+        
+        /* Mobile adjustment */
+        @media (max-width: 640px) {
+            .form-card { @apply rounded-[2rem] p-5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 pb-20">
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-green-100 sticky top-0 z-[100] px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 bg-green-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+                <h1 class="font-black text-xs uppercase tracking-widest text-green-800">Enrollment Portal</h1>
+            </div>
+            <a href="admin.html" class="text-[10px] font-black uppercase text-slate-400 hover:text-green-700 transition">Exit Portal</a>
+        </div>
+    </nav>
+
+    <header class="gradient-green py-16 text-center text-white hero-pattern relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <h2 class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">Farmer Onboarding</h2>
+            <p class="text-green-300 text-xs md:text-sm font-bold uppercase tracking-[0.3em]">IIG Smart Farmers Strategic Enrollment</p>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto -mt-10 px-4 md:px-6 relative z-20">
+        <form id="enrollment-form" class="space-y-6">
+            
+            <div class="form-card">
+                <div class="flex items-center space-x-3 mb-6">
+                    <span class="h-8 w-8 rounded-lg bg-green-800 text-white flex items-center justify-center font-black text-xs">01</span>
+                    <h3 class="font-black uppercase text-xs tracking-widest text-slate-400">Personal Identity</h3>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="input-group">
+                        <label>Full Legal Name</label>
+                        <input type="text" id="m-name" required placeholder="As per National ID">
+                    </div>
+                    <div class="input-group">
+                        <label>M-Pesa Registered Phone</label>
+                        <input type="tel" id="m-phone" required placeholder="07XX XXX XXX">
+                    </div>
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select id="m-gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="m-dob" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="flex items-center space-x-3 mb-6">
+                    <span class="h-8 w-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-xs">02</span>
+                    <h3 class="font-black uppercase text-xs tracking-widest text-slate-400">Geological Mapping</h3>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="input-group col-span-2">
+                        <label>County</label>
+                        <input type="text" id="geo-county" required placeholder="e.g. Kakamega">
+                    </div>
+                    <div class="input-group col-span-2">
+                        <label>Sub-County</label>
+                        <input type="text" id="geo-subcounty" required placeholder="e.g. Lurambi">
+                    </div>
+                    <div class="input-group col-span-2">
+                        <label>Ward / Location</label>
+                        <input type="text" id="geo-location" required placeholder="e.g. Butsotso East">
+                    </div>
+                    <div class="input-group col-span-2">
+                        <label>Village</label>
+                        <input type="text" id="geo-village" required placeholder="e.g. Eshisiru">
+                    </div>
+                </div>
+            </div>
+             
+            <div class="form-card">
+                <div class="flex items-center space-x-3 mb-6">
+                    <span class="h-8 w-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-xs">03</span>
+                    <h3 class="font-black uppercase text-xs tracking-widest text-slate-400">Verification Evidence</h3>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label>Upload National ID (Front)</label>
+                        <div class="relative h-48 w-full rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden">
+                            <i class="fas fa-id-card text-3xl text-slate-300"></i>
+                            <input type="file" id="id-front-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this, 'preview-front')">
+                            <img id="preview-front" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <p class="text-[8px] font-black uppercase text-slate-400 mt-2">Tap to Capture ID Front</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <label>Upload National ID (Back)</label>
+                        <div class="relative h-48 w-full rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden">
+                            <i class="fas fa-camera text-3xl text-slate-300"></i>
+                            <input type="file" id="id-back-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this, 'preview-back')">
+                            <img id="preview-back" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <p class="text-[8px] font-black uppercase text-slate-400 mt-2">Tap to Capture ID Back</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-3">
+                        <span class="h-8 w-8 rounded-lg bg-orange-500 text-white flex items-center justify-center font-black text-xs">04</span>
+                        <h3 class="font-black uppercase text-xs tracking-widest text-slate-400">Farmer Signature</h3>
+                    </div>
+                    <button type="button" onclick="clearSignature()" class="text-[9px] font-black uppercase text-red-500">Clear Pad</button>
+                </div>
+                <canvas id="signature-pad" class="w-full h-48 shadow-inner" height="192"></canvas>
+                <p class="text-[8px] text-center font-bold text-slate-400 mt-4 uppercase">By signing, the farmer agrees to IIG Smart Farmers Terms & Conditions</p>
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full bg-slate-900 text-white font-black py-8 rounded-[2.5rem] shadow-2xl hover:bg-green-700 transition-all uppercase tracking-[0.4em] text-xs">
+                Submit Enrollment Request
+            </button>
+        </form>
+    </main>
+
+    <script>
+        // Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const auth = firebase.auth();
+
+        // Signature Pad Logic
+        const canvas = document.getElementById('signature-pad');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+
+        function initCanvas() {
+            canvas.width = canvas.offsetWidth;
+            ctx.strokeStyle = "#0f172a";
+            ctx.lineWidth = 3;
+            ctx.lineCap = "round";
+        }
+        window.onresize = initCanvas;
+        initCanvas();
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        window.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('touchstart', (e) => startDraw(e.touches[0]));
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+        window.addEventListener('touchend', stopDraw);
+
+        function startDraw(e) {
+            drawing = true;
+            ctx.beginPath();
+            const rect = canvas.getBoundingClientRect();
+            ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+        function draw(e) {
+            if (!drawing) return;
+            const rect = canvas.getBoundingClientRect();
+            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.stroke();
+        }
+        function stopDraw() { drawing = false; }
+        function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        // Image Handling
+        let idFrontBase64 = "", idBackBase64 = "";
+
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    if(previewId === 'preview-front') idFrontBase64 = e.target.result;
+                    else idBackBase64 = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Submission
+        document.getElementById('enrollment-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            
+            // Check for signature
+            const blank = document.createElement('canvas');
+            blank.width = canvas.width;
+            blank.height = canvas.height;
+            if(canvas.toDataURL() === blank.toDataURL()) return alert("Farmer signature is required.");
+            if(!idFrontBase64) return alert("Please capture ID front photo.");
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Syncing to Master Hub...';
+
+            const requestData = {
+                name: document.getElementById('m-name').value,
+                phone: document.getElementById('m-phone').value,
+                gender: document.getElementById('m-gender').value,
+                dob: document.getElementById('m-dob').value,
+                geo: {
+                    county: document.getElementById('geo-county').value,
+                    subcounty: document.getElementById('geo-subcounty').value,
+                    location: document.getElementById('geo-location').value,
+                    village: document.getElementById('geo-village').value
+                },
+                idFront: idFrontBase64,
+                idBack: idBackBase64,
+                signature: canvas.toDataURL(),
+                status: 'pending',
+                submittedBy: auth.currentUser ? auth.currentUser.email : "Authorized Field Agent",
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            try {
+                await database.ref('requests/onboarding').push(requestData);
+                alert("Enrollment Packet Sent Successfully! This request is now pending Admin approval.");
+                location.reload();
+            } catch (err) {
+                alert("Critical Error: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Retry Submission";
+            }
+        };
+    </script>
+</body>
+</html>

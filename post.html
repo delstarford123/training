@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Intelligence | Simba Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        .float-greeting { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        
+        .interaction-icon { cursor: pointer; transition: all 0.2s ease; }
+        .interaction-icon:hover { transform: scale(1.1); }
+        .liked { color: #ef4444 !important; font-weight: 900; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900">
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[100] px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="h-10 w-10 bg-green-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+                <div>
+                    <h1 class="font-black text-xs uppercase tracking-widest text-green-900 leading-none">Post Intelligence</h1>
+                    <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Broadcast Terminal Node</p>
+                </div>
+            </div>
+            
+            <div id="auth-status" class="hidden flex items-center space-x-4">
+                <a href="index.html" class="text-[10px] font-black text-slate-400 hover:text-green-700 uppercase tracking-widest transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Return to Hub
+                </a>
+                <span id="user-email-nav" class="text-[9px] font-black uppercase text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-100"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto py-10 px-4 grid lg:grid-cols-2 gap-10">
+        
+        <div id="post-ui" class="hidden space-y-8">
+            <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
+                <div class="gradient-dark p-10 text-white relative hero-pattern">
+                    <h2 class="text-2xl font-black uppercase tracking-tighter">Strategic Broadcast</h2>
+                    <p class="text-green-300 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Configure Data for Network Deployment</p>
+                </div>
+
+                <form id="activity-form" class="p-8 space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Broadcast Category</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="category" value="Announcement" checked class="hidden peer">
+                                <span class="px-4 py-2 rounded-xl border border-slate-200 text-[9px] font-black uppercase peer-checked:bg-green-600 peer-checked:text-white transition block">📢 Announcement</span>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="category" value="Financial" class="hidden peer">
+                                <span class="px-4 py-2 rounded-xl border border-slate-200 text-[9px] font-black uppercase peer-checked:bg-blue-600 peer-checked:text-white transition block">💰 Financial Hub</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Update Headline</label>
+                        <input type="text" id="event-title" required oninput="updatePreview()" class="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 transition font-bold" placeholder="Headline...">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Message Body</label>
+                        <textarea id="event-desc" rows="5" required oninput="updatePreview()" class="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 transition text-sm leading-relaxed" placeholder="Detailed message for farmers..."></textarea>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 group hover:border-green-500 transition-all text-center relative">
+                        <i class="fas fa-camera text-slate-300 text-2xl mb-2 group-hover:text-green-500 transition"></i>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Replace Default Logo (Optional)</label>
+                        <input type="file" id="event-file" accept="image/*" onchange="handleFile(event)" class="w-full text-[10px] text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[9px] file:font-black file:bg-slate-900 file:text-white cursor-pointer">
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full bg-slate-900 text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-green-700 transition transform active:scale-95 uppercase tracking-[0.3em] text-xs">
+                        Publish to IIG SMART FARMERS NETWORK
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] ml-6"> Live Preview</h3>
+            
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden sticky top-28">
+                <div class="p-6 flex items-center space-x-3 border-b border-slate-50">
+                    <div class="h-10 w-10 bg-green-900 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md">IIG</div>
+                    <div>
+                        <p class="text-xs font-black uppercase tracking-tight">IIG Smart Farmers</p>
+                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Just now • <span id="prev-cat" class="text-green-600">Announcement</span></p>
+                    </div>
+                </div>
+                
+                <div class="p-8 space-y-4">
+                    <h2 id="prev-title" class="text-xl font-black text-slate-800 leading-tight">Post Headline Preview</h2>
+                    <p id="prev-desc" class="text-[13px] text-slate-600 leading-relaxed">Your message appears here...</p>
+                </div>
+                
+                <div class="px-8 pb-8">
+                    <img id="prev-img" src="IIG LOGO.jpeg" class="w-full h-64 object-cover rounded-[2rem] shadow-lg border border-slate-100">
+                    <p id="img-label" class="text-[8px] text-center mt-3 font-black uppercase text-slate-300 tracking-widest">Default Network Branding Active</p>
+                </div>
+
+                <div class="px-10 py-5 bg-slate-50 flex items-center justify-between border-t">
+                    <div class="flex space-x-10 text-slate-400">
+                        <div onclick="toggleLike(this)" class="interaction-icon flex items-center">
+                             <i class="far fa-heart text-xl mr-2"></i>
+                             <span class="text-[10px] font-black uppercase tracking-widest">Like</span>
+                        </div>
+                        
+                        <div onclick="simulateComment()" class="interaction-icon flex items-center hover:text-blue-500">
+                             <i class="far fa-comment text-xl mr-2"></i>
+                             <span id="comment-count-prev" class="text-[10px] font-black uppercase tracking-widest">Comment (0)</span>
+                        </div>
+
+                        <div onclick="alert('Sharing disabled in preview mode.')" class="interaction-icon flex items-center hover:text-green-600">
+                             <i class="fas fa-share text-xl mr-2"></i>
+                             <span class="text-[10px] font-black uppercase tracking-widest">Share</span>
+                        </div>
+                    </div>
+                    <span class="text-[8px] font-black uppercase text-slate-300 tracking-widest">Verified Node</span>
+                </div>
+
+                <div id="preview-comment-input" class="hidden p-6 bg-slate-100 border-t flex space-x-3">
+                    <input type="text" placeholder="Write a comment..." disabled class="flex-1 px-4 py-2 rounded-full border bg-white text-xs opacity-50">
+                    <button disabled class="bg-green-600 text-white px-4 py-2 rounded-full text-[10px] font-black opacity-50">Post</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="greeting-bubble" class="hidden fixed bottom-8 right-8 z-[500] float-greeting">
+        <div class="gradient-dark p-4 rounded-3xl shadow-2xl flex items-center space-x-4 border-2 border-white/20 backdrop-blur-xl">
+            <div class="h-10 w-10 bg-green-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                <i class="fas fa-feather-alt"></i>
+            </div>
+            <div class="pr-4">
+                <p class="text-[8px] font-black text-green-300 uppercase leading-none mb-1">IIG SMART FARMERS Authorized</p>
+                <h4 id="greeting-text" class="text-[11px] font-black text-white uppercase tracking-tight">Post Editor Ready</h4>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        const whitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+
+        auth.onAuthStateChanged(user => {
+            if (user && whitelist.includes(user.email)) {
+                document.getElementById('post-ui').classList.remove('hidden');
+                document.getElementById('greeting-bubble').classList.remove('hidden');
+                document.getElementById('user-email-nav').innerText = user.email;
+                document.getElementById('greeting-text').innerText = `Admin: ${user.email.split('@')[0]}`;
+            } else {
+                if (user) auth.signOut();
+                window.location.href = "index.html";
+            }
+        });
+
+        function updatePreview() {
+            document.getElementById('prev-title').innerText = document.getElementById('event-title').value || "Post Headline Preview";
+            document.getElementById('prev-desc').innerText = document.getElementById('event-desc').value || "Your message appears here...";
+            document.getElementById('prev-cat').innerText = document.querySelector('input[name="category"]:checked').value;
+        }
+
+        function toggleLike(element) {
+            const icon = element.querySelector('i');
+            icon.classList.toggle('fas');
+            icon.classList.toggle('far');
+            element.classList.toggle('liked');
+        }
+
+        function simulateComment() {
+            document.getElementById('preview-comment-input').classList.toggle('hidden');
+        }
+
+        let customImageUploaded = false;
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('prev-img').src = e.target.result;
+                document.getElementById('img-label').innerText = "Custom Media Attached";
+                document.getElementById('img-label').classList.replace('text-slate-300', 'text-green-500');
+                customImageUploaded = true;
+            }
+            if(file) reader.readAsDataURL(file);
+        }
+
+        document.getElementById('activity-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-satellite-dish animate-pulse mr-2"></i> Syncing Hub...';
+
+            const payload = {
+                title: document.getElementById('event-title').value,
+                description: document.getElementById('event-desc').value,
+                category: document.querySelector('input[name="category"]:checked').value,
+                timestamp: new Date().toISOString(),
+                author: auth.currentUser.email,
+                media: customImageUploaded ? document.getElementById('prev-img').src : null
+            };
+
+            try {
+                await database.ref('activities').push(payload);
+                alert("Intelligence deployed successfully! 🚀");
+                location.reload();
+            } catch (err) {
+                alert("Error: " + err.message);
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

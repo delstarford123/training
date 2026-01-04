@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Hub Console | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        /* Hierarchy Styling */
+        .center-node { border-left: 6px solid #10b981; margin-bottom: 1.5rem; border-radius: 1.5rem; overflow: hidden; background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .group-node { border-left: 5px solid #3b82f6; margin-left: 1rem; margin-top: 0.75rem; border-radius: 1rem; background: #f1f5f9; padding: 0.75rem; }
+        .member-node { border-left: 3px solid #cbd5e1; margin-left: 1.5rem; margin-top: 0.5rem; border-radius: 0.75rem; background: white; transition: all 0.2s ease; }
+        .member-node:hover { border-color: #10b981; transform: translateX(5px); background: #f0fdf4; }
+        
+        .modal-active { display: flex !important; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .rotate-icon { transform: rotate(90deg); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        .search-highlight { background-color: #fef08a !important; border: 2px solid #eab308 !important; }
+
+        @media (max-width: 768px) {
+            .center-node { border-left-width: 4px; }
+            .group-node { margin-left: 0.5rem; }
+            .member-node { margin-left: 1rem; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 overflow-x-hidden">
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-green-100 sticky top-0 z-[100] px-4 md:px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 bg-green-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+                <h1 class="font-black text-[10px] md:text-xs uppercase tracking-widest text-green-800 leading-tight">Master Hub<br>Console</h1>
+            </div>
+            
+            <div id="auth-status" class="hidden flex items-center space-x-2 md:space-x-4">
+                <button onclick="toggleNotifications()" class="relative p-2 md:p-3 bg-slate-100 rounded-xl hover:bg-green-100 transition">
+                    <i class="fas fa-bell text-slate-600 text-sm"></i>
+                    <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+                <button onclick="auth.signOut()" class="text-red-500 font-bold text-[10px] uppercase hover:underline hidden md:block">Logout</button>
+                <div class="h-10 w-10 rounded-full bg-green-800 flex items-center justify-center text-white text-xs font-bold md:hidden" onclick="auth.signOut()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-8">
+        
+        <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden mt-12 border">
+            <div class="gradient-dark p-10 text-white text-center hero-pattern">
+                <i class="fas fa-shield-halved text-5xl text-green-400 mb-4"></i>
+                <h2 class="text-2xl font-black uppercase tracking-widest">Master Identity</h2>
+                <p class="text-[10px] text-green-300 uppercase mt-2">Secure Strategic Terminal</p>
+            </div>
+            <form id="login-form" class="p-8 space-y-5">
+                <input type="email" id="admin-email" placeholder="Master Email" class="w-full px-5 py-4 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500" required>
+                <input type="password" id="admin-password" placeholder="Access Key" class="w-full px-5 py-4 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500" required>
+                <button type="submit" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl shadow-xl hover:bg-green-700 transition uppercase tracking-widest text-sm">Synchronize</button>
+            </form>
+        </div>
+
+        <div id="dashboard-ui" class="hidden space-y-8">
+            
+            <div class="flex overflow-x-auto pb-4 gap-3 no-scrollbar md:hidden">
+                <a href="cgt access.html" class="flex-shrink-0 bg-indigo-600 text-white px-4 py-3 rounded-2xl text-[10px] font-black uppercase flex items-center"><i class="fas fa-tower-broadcast mr-2"></i> CGT</a>
+                <a href="post.html" class="flex-shrink-0 bg-green-600 text-white px-4 py-3 rounded-2xl text-[10px] font-black uppercase flex items-center"><i class="fas fa-plus mr-2"></i> Post</a>
+                <button onclick="expandAll()" class="flex-shrink-0 bg-slate-200 px-4 py-3 rounded-2xl text-[10px] font-black uppercase">Expand</button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+                    <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Org Members</p>
+                    <h3 id="stat-members" class="text-2xl md:text-3xl font-black mt-1">0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+                    <p class="text-[8px] font-black text-blue-500 uppercase tracking-widest">Master MSA</p>
+                    <h3 id="stat-total-msa" class="text-lg md:text-xl font-black mt-1 text-blue-600">KSh 0</h3>
+                </div>
+                <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+                    <p class="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Personal Nodes</p>
+                    <h3 id="stat-total-psa" class="text-lg md:text-xl font-black mt-1 text-indigo-600">KSh 0</h3>
+                </div>
+                <div class="bg-slate-900 p-5 rounded-3xl text-white shadow-xl flex flex-col justify-between col-span-2 md:col-span-1">
+                    <p class="text-[8px] font-black text-white/40 uppercase tracking-widest">Aggregate Liquidity</p>
+                    <h3 id="stat-total-gca" class="text-xl font-black text-green-400">KSh 0</h3>
+                </div>
+            </div>
+
+            <div id="notif-panel" class="hidden bg-white rounded-[2rem] border-2 border-green-500 shadow-2xl p-6 md:p-8 overflow-hidden">
+                <div class="flex justify-between items-center mb-6 border-b pb-4">
+                    <h3 class="font-black uppercase text-xs md:text-sm tracking-widest text-green-700"><i class="fas fa-user-clock mr-2"></i> Pending Onboarding Requests</h3>
+                    <button onclick="toggleNotifications()" class="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="request-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <h2 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Organization Architect</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="p-6 bg-green-50 rounded-3xl border border-green-100">
+                        <p class="text-[9px] font-black uppercase mb-3 text-green-700">Add Ward Hub (Center)</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="new-center-name" placeholder="Name (e.g. Kakamega)" class="flex-1 p-3 rounded-xl border text-xs font-bold uppercase">
+                            <button onclick="createCenter()" class="bg-green-700 text-white px-5 rounded-xl text-[9px] font-black uppercase">Add</button>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-blue-50 rounded-3xl border border-blue-100">
+                        <p class="text-[9px] font-black uppercase mb-3 text-blue-700">Add Sub-Group</p>
+                        <div class="space-y-2">
+                            <select id="parent-center-select" class="w-full p-3 rounded-xl border text-xs font-bold bg-white"></select>
+                            <div class="flex gap-2">
+                                <input type="text" id="new-group-name" placeholder="Group Name" class="flex-1 p-3 rounded-xl border text-xs font-bold uppercase">
+                                <button onclick="createGroup()" class="bg-blue-700 text-white px-5 rounded-xl text-[9px] font-black uppercase">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h2 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Hierarchy Master Lookup</h2>
+                    <div class="flex space-x-2 w-full md:w-auto">
+                        <input type="text" id="master-search" oninput="filterHierarchy()" placeholder="Search name or phone..." class="w-full md:w-64 pl-5 pr-4 py-3 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 text-xs font-bold">
+                        <div class="hidden md:flex space-x-1">
+                            <button onclick="expandAll()" class="text-[8px] font-black bg-slate-100 px-4 py-2 rounded-lg uppercase">Expand</button>
+                            <button onclick="collapseAll()" class="text-[8px] font-black bg-slate-100 px-4 py-2 rounded-lg uppercase">Hide</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="hierarchy-tree" class="space-y-4 pb-10 max-h-[100vh] overflow-y-auto custom-scrollbar pr-2">
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="details-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-xl z-[200] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="gradient-dark p-6 md:p-8 text-white flex justify-between items-center hero-pattern">
+                <div class="text-left">
+                    <h3 id="modal-name" class="text-xl md:text-3xl font-black uppercase tracking-tighter">Identity Node</h3>
+                    <p id="modal-id" class="text-[10px] text-green-400 font-mono tracking-widest mt-2 uppercase"></p>
+                </div>
+                <button onclick="closeModal()" class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-red-500 transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="modal-body" class="p-6 md:p-10 space-y-8 overflow-y-auto custom-scrollbar bg-slate-50">
+                </div>
+
+            <div class="p-6 bg-white border-t flex justify-between items-center">
+                <p class="hidden md:block text-[9px] text-slate-400 font-black uppercase">Official IIG Master Accountability Node</p>
+                <button onclick="window.print()" class="w-full md:w-auto bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase flex items-center justify-center">
+                    <i class="fas fa-print mr-2"></i> Export Data Record
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="assign-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[250] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
+            <h3 class="text-xl font-black text-slate-800 uppercase">Process Enrollment</h3>
+            <div id="assign-preview" class="p-4 bg-slate-50 rounded-2xl border text-xs font-bold text-slate-600 space-y-1"></div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Assign to Center</label>
+                    <select id="assign-center" class="w-full p-3 rounded-xl border mt-1 font-bold text-sm" onchange="filterAssignGroups()"></select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black uppercase text-slate-400 ml-1">Assign to Group</label>
+                    <select id="assign-group" class="w-full p-3 rounded-xl border mt-1 font-bold text-sm"></select>
+                </div>
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button onclick="closeAssignModal()" class="flex-1 py-3 bg-slate-100 rounded-xl font-black uppercase text-[10px]">Cancel</button>
+                <button onclick="finalizeApproval()" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-black uppercase text-[10px] shadow-lg">Confirm Enrollment</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+        
+        // Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        let db_centers = {}, db_groups = {}, db_members = {}, db_audits = {}, db_requests = {};
+        let currentRequestId = null;
+
+        // Auth Logic
+        auth.onAuthStateChanged(user => {
+            const whitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+            if (user && whitelist.includes(user.email)) {
+                document.getElementById('login-ui').classList.add('hidden');
+                document.getElementById('dashboard-ui').classList.remove('hidden');
+                document.getElementById('auth-status').classList.remove('hidden');
+                startAdminListeners();
+            } else {
+                document.getElementById('login-ui').classList.remove('hidden');
+                document.getElementById('dashboard-ui').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('login-form').onsubmit = (e) => {
+            e.preventDefault();
+            auth.signInWithEmailAndPassword(document.getElementById('admin-email').value, document.getElementById('admin-password').value).catch(err => alert(err.message));
+        };
+
+        // Real-time Data Listeners
+        function startAdminListeners() {
+            database.ref('organization/centers').on('value', s => { db_centers = s.val() || {}; updateArchitectDropdowns(); buildTree(); });
+            database.ref('organization/groups').on('value', s => { db_groups = s.val() || {}; buildTree(); });
+            database.ref('records/members').on('value', s => { db_members = s.val() || {}; buildTree(); });
+            database.ref('records/audits').on('value', s => { db_audits = s.val() || {}; buildTree(); });
+            database.ref('requests/onboarding').on('value', s => { db_requests = s.val() || {}; renderPendingRequests(); });
+        }
+
+        // Stats & Hierarchy Tree
+        function buildTree() {
+            const tree = document.getElementById('hierarchy-tree');
+            tree.innerHTML = "";
+            let sums = { gca: 0, msa: 0, psa: 0, count: 0 };
+
+            Object.entries(db_centers).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([cId, center]) => {
+                const centerGroups = Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cId);
+                let centerGCA = 0;
+
+                let groupHtml = centerGroups.map(([gId, group]) => {
+                    const groupMembers = Object.entries(db_members).filter(([_, m]) => m.groupId === gId);
+                    let gSumGCA = 0;
+
+                    let memberHtml = groupMembers.map(([mId, m]) => {
+                        sums.count++;
+                        const audits = Object.values(db_audits).filter(a => a.farmerPhone === m.phone);
+                        const latest = audits[audits.length - 1];
+                        const f = latest?.financials || {};
+                        
+                        const msa = parseFloat(f.msa || 0), gff = parseFloat(f.gff || 0), gmf = parseFloat(f.gmf || 0);
+                        const psa = parseFloat(f.psa || 0), afs = parseFloat(f.afs || 0), fis = parseFloat(f.fis || 0);
+                        const total = msa + gff + gmf + psa + afs + fis;
+
+                        sums.msa += (msa + gff + gmf);
+                        sums.psa += (psa + afs + fis);
+                        sums.gca += total;
+                        gSumGCA += total;
+
+                        return `
+                            <div onclick="openInspector('${mId}')" class="member-node p-4 border border-slate-100 flex justify-between items-center cursor-pointer" data-name="${m.name.toLowerCase()}" data-phone="${m.phone}">
+                                <div><p class="font-black text-[11px] uppercase">${m.name}</p><p class="text-[8px] font-bold text-slate-400">${m.phone}</p></div>
+                                <div class="text-right">
+                                    <p class="text-[10px] font-black text-green-700 leading-none">KSh ${total.toLocaleString()}</p>
+                                    <p class="text-[6px] font-bold uppercase text-slate-300 mt-1">Aggregate</p>
+                                </div>
+                            </div>`;
+                    }).join('');
+
+                    centerGCA += gSumGCA;
+                    return `
+                        <div class="group-node border border-slate-200">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="toggleNode('node-${gId}')">
+                                <div class="flex items-center"><i id="icon-node-${gId}" class="fas fa-chevron-right mr-3 text-blue-500 transition-transform"></i><h4 class="font-black text-slate-800 text-xs uppercase">${group.name}</h4></div>
+                                <div class="bg-slate-900 text-white px-3 py-1 rounded-full text-[8px] font-black">KSh ${gSumGCA.toLocaleString()}</div>
+                            </div>
+                            <div id="node-${gId}" class="hidden mt-3 space-y-1">${memberHtml || '<p class="text-[8px] text-center p-2 italic text-slate-400">Empty Group</p>'}</div>
+                        </div>`;
+                }).join('');
+
+                tree.innerHTML += `
+                    <div class="center-node">
+                        <div class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition" onclick="toggleNode('node-${cId}')">
+                            <div class="flex items-center"><i id="icon-node-${cId}" class="fas fa-chevron-down mr-4 text-green-600 transition-transform"></i><div><h3 class="text-lg font-black text-slate-900 uppercase">${center.name} Centre</h3></div></div>
+                            <div class="text-right"><p class="text-sm font-black leading-none">KSh ${centerGCA.toLocaleString()}</p></div>
+                        </div>
+                        <div id="node-${cId}" class="px-5 pb-5">${groupHtml || '<p class="text-xs text-slate-400 ml-8 italic">No groups defined</p>'}</div>
+                    </div>`;
+            });
+
+            document.getElementById('stat-members').innerText = sums.count;
+            document.getElementById('stat-total-msa').innerText = `KSh ${sums.msa.toLocaleString()}`;
+            document.getElementById('stat-total-psa').innerText = `KSh ${sums.psa.toLocaleString()}`;
+            document.getElementById('stat-total-gca').innerText = `KSh ${sums.gca.toLocaleString()}`;
+        }
+
+        // Onboarding / Requests
+        function renderPendingRequests() {
+            const list = document.getElementById('request-list');
+            const countBadge = document.getElementById('notif-count');
+            let count = 0;
+            list.innerHTML = "";
+
+            Object.entries(db_requests).forEach(([id, r]) => {
+                if(r.status === 'pending') {
+                    count++;
+                    list.innerHTML += `
+                        <div class="bg-slate-50 p-6 rounded-3xl border flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+                            <div class="flex items-center gap-4">
+                                <img src="${r.idFront || 'https://via.placeholder.com/100?text=ID'}" class="w-16 h-16 object-cover rounded-xl shadow-md cursor-zoom-in" onclick="window.open(this.src)">
+                                <div>
+                                    <p class="font-black text-sm uppercase">${r.name}</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase">${r.geo?.village || 'Unknown Location'}</p>
+                                    <p class="text-[9px] mt-1 text-indigo-600 font-black">Submitted by Agent: ${r.submittedBy}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 w-full md:w-auto">
+                                <button onclick="openAssignModal('${id}')" class="flex-1 md:flex-none bg-green-600 text-white px-6 py-3 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-green-100">Review & Approve</button>
+                                <button onclick="denyRequest('${id}')" class="flex-1 md:flex-none bg-red-100 text-red-600 px-6 py-3 rounded-xl text-[9px] font-black uppercase">Deny</button>
+                            </div>
+                        </div>`;
+                }
+            });
+            countBadge.innerText = count;
+            countBadge.classList.toggle('hidden', count === 0);
+        }
+
+        function openAssignModal(id) {
+            currentRequestId = id;
+            const r = db_requests[id];
+            document.getElementById('assign-preview').innerHTML = `<p>Applicant: ${r.name}</p><p>Phone: ${r.phone}</p><p>Agent Area: ${r.geo?.village}</p>`;
+            
+            let centerOpts = '<option value="">Select Target Center</option>';
+            Object.entries(db_centers).forEach(([cid, c]) => centerOpts += `<option value="${cid}">${c.name}</option>`);
+            document.getElementById('assign-center').innerHTML = centerOpts;
+            document.getElementById('assign-group').innerHTML = '<option value="">Select Group (Pick Center First)</option>';
+            
+            document.getElementById('assign-modal').classList.remove('hidden');
+            document.getElementById('assign-modal').classList.add('flex');
+        }
+
+        function filterAssignGroups() {
+            const cid = document.getElementById('assign-center').value;
+            let groupOpts = '<option value="">Select Target Group</option>';
+            Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cid).forEach(([gid, g]) => {
+                groupOpts += `<option value="${gid}">${g.name}</option>`;
+            });
+            document.getElementById('assign-group').innerHTML = groupOpts;
+        }
+
+        async function finalizeApproval() {
+            const cid = document.getElementById('assign-center').value;
+            const gid = document.getElementById('assign-group').value;
+            if(!cid || !gid) return alert("Please assign both a Center and a Group.");
+
+            const r = db_requests[currentRequestId];
+            const memberID = "IIG-MEM-" + Math.floor(1000 + Math.random() * 9000);
+            
+            try {
+                await database.ref(`records/members`).push({
+                    ...r,
+                    memberID: memberID,
+                    status: 'active',
+                    centerId: cid,
+                    groupId: gid,
+                    approvedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                await database.ref(`requests/onboarding/${currentRequestId}`).remove();
+                alert("Member successfully onboarded!");
+                closeAssignModal();
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+        }
+
+        async function denyRequest(id) {
+            if(confirm("Permanently deny and remove this onboarding request?")) {
+                await database.ref(`requests/onboarding/${id}`).remove();
+            }
+        }
+
+        // Inspector & Modal Functions
+        function openInspector(mId) {
+            const m = db_members[mId];
+            if(!m) return;
+            const audits = Object.values(db_audits).filter(a => a.farmerPhone === m.phone).reverse();
+            
+            document.getElementById('modal-name').innerText = m.name;
+            document.getElementById('modal-id').innerText = `Identity Registry: ${m.phone}`;
+
+            let auditCards = audits.map(a => {
+                const f = a.financials || {};
+                const psa = parseFloat(f.psa || 0), afs = parseFloat(f.afs || 0), fis = parseFloat(f.fis || 0);
+                const msa = parseFloat(f.msa || 0), gff = parseFloat(f.gff || 0), gmf = parseFloat(f.gmf || 0);
+                const total = psa + afs + fis + msa + gff + gmf;
+
+                return `
+                    <div class="bg-white border rounded-[2rem] overflow-hidden shadow-sm border-slate-200">
+                        <div class="bg-slate-100 px-6 py-3 flex justify-between items-center border-b">
+                            <span class="text-[9px] font-black text-indigo-700 uppercase"><i class="far fa-clock mr-2"></i> Sync: ${new Date(a.timestamp).toLocaleString()}</span>
+                            <span class="text-[8px] font-bold text-slate-400">Officer: ${a.officer || 'HQ'}</span>
+                        </div>
+                        <div class="p-6 grid md:grid-cols-3 gap-6">
+                            <div class="space-y-2">
+                                <p class="text-[9px] font-black uppercase text-indigo-500 border-b pb-1">Personal Nodes</p>
+                                <div class="text-[11px] font-bold text-slate-600">
+                                    <div class="flex justify-between"><span>PSA:</span><span>KSh ${psa.toLocaleString()}</span></div>
+                                    <div class="flex justify-between"><span>AFS:</span><span>KSh ${afs.toLocaleString()}</span></div>
+                                    <div class="flex justify-between"><span>FIS:</span><span>KSh ${fis.toLocaleString()}</span></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-[9px] font-black uppercase text-blue-500 border-b pb-1">Group Portfolio</p>
+                                <div class="text-[11px] font-bold text-slate-600">
+                                    <div class="flex justify-between"><span>MSA:</span><span>KSh ${msa.toLocaleString()}</span></div>
+                                    <div class="flex justify-between"><span>GFF:</span><span>KSh ${gff.toLocaleString()}</span></div>
+                                    <div class="flex justify-between"><span>GMF:</span><span>KSh ${gmf.toLocaleString()}</span></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center justify-center bg-slate-50 rounded-2xl p-4 border border-dashed">
+                                <img src="${a.verificationMedia || 'https://via.placeholder.com/150?text=No+Photo'}" class="w-full h-24 object-cover rounded-xl shadow-md cursor-zoom-in" onclick="window.open(this.src)">
+                                <p class="text-[7px] font-black uppercase text-slate-400 mt-2">Field Evidence Node</p>
+                            </div>
+                        </div>
+                        <div class="bg-green-600 px-6 py-4 text-white flex justify-between items-center">
+                            <h4 class="text-xs font-black uppercase">Aggregate GCA Liquidity</h4>
+                            <h2 class="text-xl font-black">KSh ${total.toLocaleString()}</h2>
+                        </div>
+                    </div>`;
+            }).join('');
+
+            document.getElementById('modal-body').innerHTML = `
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div class="p-6 bg-white rounded-3xl border border-slate-200">
+                        <p class="text-[9px] font-black uppercase text-slate-400 mb-4 border-b pb-2">Onboarding Documents</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><p class="text-[8px] font-bold mb-1 uppercase">ID Front</p><img src="${m.idFront || ''}" class="rounded-xl border shadow-sm h-32 w-full object-cover"></div>
+                            <div><p class="text-[8px] font-bold mb-1 uppercase">ID Back</p><img src="${m.idBack || ''}" class="rounded-xl border shadow-sm h-32 w-full object-cover"></div>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-200">
+                        <p class="text-[9px] font-black uppercase text-slate-400 mb-4 border-b pb-2">Member Info</p>
+                        <div class="space-y-2 text-xs font-bold text-slate-700">
+                            <p>Gender: ${m.gender || 'N/A'}</p>
+                            <p>Age: ${m.age || 'N/A'}</p>
+                            <p>Registry Node: ${m.phone}</p>
+                            <p>Status: <span class="text-green-600">ACTIVE ACCOUNT</span></p>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-sm font-black uppercase tracking-widest text-slate-400 mb-4 ml-2">Sync History Log</h3>
+                ${auditCards || '<p class="text-center py-20 text-slate-400 italic">No sync packets found.</p>'}
+            `;
+            document.getElementById('details-modal').classList.add('modal-active');
+        }
+
+        // Helpers
+        function createCenter() {
+            const name = document.getElementById('new-center-name').value.trim();
+            if(!name) return;
+            database.ref('organization/centers').push({ name: name.toUpperCase() });
+            document.getElementById('new-center-name').value = "";
+        }
+
+        function createGroup() {
+            const name = document.getElementById('new-group-name').value.trim();
+            const parent = document.getElementById('parent-center-select').value;
+            if(!name || !parent) return alert("Select a Center and Enter Group Name");
+            database.ref('organization/groups').push({ name: name.toUpperCase(), parentCenter: parent });
+            document.getElementById('new-group-name').value = "";
+        }
+
+        function updateArchitectDropdowns() {
+            let opts = '<option value="">Target Ward Hub...</option>';
+            Object.entries(db_centers).forEach(([id, c]) => opts += `<option value="${id}">${c.name}</option>`);
+            document.getElementById('parent-center-select').innerHTML = opts;
+        }
+
+        function filterHierarchy() {
+            const term = document.getElementById('master-search').value.toLowerCase().trim();
+            document.querySelectorAll('.member-node').forEach(node => {
+                const match = node.dataset.name.includes(term) || node.dataset.phone.includes(term);
+                node.classList.toggle('hidden', !match);
+                if (match && term !== "") {
+                    node.classList.add('search-highlight');
+                    let parentGroup = node.closest('[id^="node-"]');
+                    while(parentGroup) {
+                        parentGroup.classList.remove('hidden');
+                        parentGroup = parentGroup.parentElement.closest('[id^="node-"]');
+                    }
+                } else {
+                    node.classList.remove('search-highlight');
+                }
+            });
+        }
+
+        function toggleNode(id) {
+            document.getElementById(id).classList.toggle('hidden');
+            const icon = document.getElementById('icon-' + id);
+            if(icon) icon.classList.toggle('rotate-icon');
+        }
+
+        function expandAll() { document.querySelectorAll('[id^="node-"]').forEach(n => n.classList.remove('hidden')); }
+        function collapseAll() { document.querySelectorAll('[id^="node-"]').forEach(n => n.classList.add('hidden')); }
+        function closeModal() { document.getElementById('details-modal').classList.remove('modal-active'); }
+        function toggleNotifications() { document.getElementById('notif-panel').classList.toggle('hidden'); }
+        function closeAssignModal() { 
+            document.getElementById('assign-modal').classList.remove('flex'); 
+            document.getElementById('assign-modal').classList.add('hidden'); 
+        }
+    </script>
+</body>
+</html>

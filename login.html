@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
+        .gradient-brand { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-200">
+        <div class="gradient-brand p-12 text-center text-white">
+            <div class="h-16 w-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-md">
+                <i class="fas fa-key text-2xl text-green-400"></i>
+            </div>
+            <h1 class="text-2xl font-black uppercase tracking-widest leading-none">Terminal Login</h1>
+            <p class="text-[9px] text-green-300 mt-3 font-bold uppercase tracking-[0.2em]">Authorized Access Only</p>
+        </div>
+
+        <form id="login-form" class="p-10 space-y-4">
+            <input type="email" id="login-email" placeholder="Registry Email" class="w-full p-5 rounded-2xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required>
+            <input type="password" id="login-password" placeholder="Access PIN" class="w-full p-5 rounded-2xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required>
+            
+            <button type="submit" id="login-btn" class="w-full bg-slate-900 text-white font-black py-6 rounded-2xl shadow-xl hover:bg-green-700 transition uppercase text-xs tracking-widest mt-2">Synchronize Access</button>
+            
+            <div class="flex justify-between items-center mt-6">
+                <a href="registerall.html" class="text-[10px] font-black uppercase text-slate-400 hover:text-green-600">Create Account</a>
+                <a href="#" class="text-[10px] font-black uppercase text-slate-400">Recovery</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+            authDomain: "help-me-up-70fcc.firebaseapp.com",
+            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+            projectId: "help-me-up-70fcc",
+            storageBucket: "help-me-up-70fcc.firebasestorage.app",
+            messagingSenderId: "593893312398",
+            appId: "1:593893312398:web:a982fca857289fc2f206df"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            btn.innerText = "VERIFYING...";
+            btn.disabled = true;
+
+            try {
+                // Log the user in
+                await auth.signInWithEmailAndPassword(email, password);
+                
+                // Redirect everyone to index.html
+                // The auth.js guard on index.html will handle role-checks from here.
+                window.location.href = "index.html"; 
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+                btn.innerText = "SYNCHRONIZE ACCESS";
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
