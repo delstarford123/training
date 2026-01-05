@@ -3,268 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CGT Dashboard | IIG SMART FARMERS</title>
+    <title>Master Terminal | IIG SMART FARMERS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; overflow-x: hidden; }
         
-        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
-        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
-        
-        /* Node Styling */
-        .center-node { border-left: 6px solid #10b981; } 
-        .group-node { border-left: 5px solid #3b82f6; } 
-        .member-node { border-left: 3px solid #cbd5e1; transition: all 0.2s; cursor: pointer; }
-        .member-node:hover { border-color: #10b981; transform: translateX(4px); background-color: #f0fdf4; }
-        .active-node { border-color: #10b981 !important; background-color: #f0fdf4 !important; box-shadow: inset 0 0 0 2px #10b981; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .member-card { background: white; border-radius: 3.5rem; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); position: relative; }
 
-        /* Forensic Animations */
-        .fraud-alert { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; border: 2px solid #ef4444 !important; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+        /* Color-Coded Fund Identity  */
+        .border-msa { border-left: 8px solid #10b981; } .text-msa { color: #10b981; }
+        .border-gff { border-left: 8px solid #ef4444; } .text-gff { color: #ef4444; }
+        .border-gmf { border-left: 8px solid #0ea5e9; } .text-gmf { color: #0ea5e9; }
+        .border-gsf { border-left: 8px solid #3b82f6; } .text-gsf { color: #3b82f6; }
+        .border-psa { border-left: 8px solid #8b5cf6; } .text-psa { color: #8b5cf6; }
+        .border-fis { border-left: 8px solid #f59e0b; } .text-fis { color: #f59e0b; }
+        .border-gca { border-left: 8px solid #064e3b; } .text-gca { color: #064e3b; }
+        .border-afs { border-left: 8px solid #d946ef; } .text-afs { color: #d946ef; }
+
+        /* PROFESSIONAL PRINT ENGINE */
+        @media print {
+            .no-print, nav, aside, button, #sidebar-overlay, .evidence-input-zone { display: none !important; }
+            body, html { background: white !important; height: auto !important; overflow: visible !important; }
+            #main-content { padding: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; position: static !important; }
+            #member-dossier { display: block !important; height: auto !important; overflow: visible !important; }
+            .member-card { border: 2px solid #f1f5f9 !important; box-shadow: none !important; margin-bottom: 2rem; break-inside: avoid; }
+            .audit-entry { border: 1px solid #e2e8f0 !important; break-inside: avoid; margin-bottom: 2rem; padding: 2rem !important; }
+            .print-header { display: block !important; }
+            input { border: none !important; background: transparent !important; pointer-events: none !important; }
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-        
-        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        #sidebar-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar-panel.hidden-mobile { transform: translateX(-100%); }
     </style>
 </head>
-<body class="min-h-screen text-slate-900">
+<body class="text-slate-900 flex flex-col h-screen">
 
-    <nav class="bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-[100] px-6 py-3">
-        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <div class="h-11 w-11 bg-green-900 rounded-2xl flex items-center justify-center text-white font-black shadow-xl ring-4 ring-green-900/10">IIG</div>
-                <div>
-                    <h1 class="font-black text-sm uppercase tracking-tighter text-green-900 leading-none">Strategic CGT Terminal</h1>
-                    <p class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-[0.2em]">Global Financial Shield </p>
-                </div>
-            </div>
-            
-            <div id="auth-status" class="hidden flex items-center space-x-3">
-                <button onclick="openOnboard()" class="bg-green-600 hover:bg-green-700 text-white text-[10px] font-black px-5 py-2.5 rounded-xl uppercase transition shadow-lg shadow-green-600/20">+ Node Onboard</button>
-                
-                <button onclick="toggleRequests()" class="relative p-2.5 bg-slate-100 rounded-xl hover:bg-slate-200 transition">
-                    <i class="fas fa-satellite"></i>
-                    <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-5 h-5 rounded-full flex items-center justify-center hidden border-2 border-white">0</span>
-                </button>
+    <div class="hidden print-header w-full text-center p-10 border-b-4 border-emerald-900">
+        <h1 class="text-4xl font-black text-emerald-900 uppercase">IIG SMART FARMERS LTD</h1>
+        <p class="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-500 mt-2">Official Financial Audit & Credit Statement</p>
+    </div>
 
-                <div class="h-8 w-[1px] bg-slate-200 mx-2"></div>
-                
-                <button onclick="auth.signOut().then(()=>location.reload())" class="text-slate-400 hover:text-red-600 transition text-xs font-black uppercase">
-                    <i class="fas fa-power-off"></i>
-                </button>
-            </div>
+    <nav class="h-[75px] bg-white border-b flex justify-between items-center px-4 md:px-8 z-[1000] no-print sticky top-0">
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500"><i class="fas fa-bars"></i></button>
+            <div class="h-10 w-10 bg-emerald-900 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+            <h1 class="font-extrabold text-[10px] uppercase tracking-widest text-emerald-900 hidden sm:block">Strategic Terminal</h1>
+        </div>
+        <div id="nav-actions" class="hidden flex items-center space-x-2">
+            <button onclick="window.print()" class="p-2.5 bg-slate-50 rounded-xl border text-emerald-600"><i class="fas fa-print"></i></button>
+            <button onclick="auth.signOut().then(()=>location.reload())" class="p-2.5 bg-slate-50 rounded-xl border text-red-500"><i class="fas fa-power-off"></i></button>
         </div>
     </nav>
 
-    <main class="max-w-[1600px] mx-auto p-4 md:p-8">
-        
-        <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[3rem] shadow-2xl overflow-hidden mt-12 border border-slate-100">
-            <div class="gradient-dark p-12 text-white text-center hero-pattern">
-                <div class="inline-flex h-20 w-20 items-center justify-center bg-white/10 rounded-full mb-6 backdrop-blur-md">
-                    <i class="fas fa-fingerprint text-4xl text-green-400"></i>
-                </div>
-                <h2 class="text-2xl font-black uppercase tracking-widest">Master Access</h2>
-                <p class="text-[10px] text-green-300 uppercase mt-2 tracking-widest opacity-70">Secured Strategic Infrastructure</p>
-            </div>
-            <form id="login-form" class="p-10 space-y-4">
-                <div class="relative">
-                    <i class="fas fa-envelope absolute left-5 top-5 text-slate-300"></i>
-                    <input type="email" id="admin-email" placeholder="Registry Email" class="w-full pl-12 pr-6 py-4 rounded-2xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500 transition" required>
-                </div>
-                <div class="relative">
-                    <i class="fas fa-shield-alt absolute left-5 top-5 text-slate-300"></i>
-                    <input type="password" id="admin-password" placeholder="Secure PIN" class="w-full pl-12 pr-6 py-4 rounded-2xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500 transition" required>
-                </div>
-                <button type="submit" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-green-700 transition uppercase text-xs tracking-widest">Establish Connection</button>
-            </form>
-        </div>
+    <div class="flex flex-1 overflow-hidden relative">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-[1040] hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-        <div id="dashboard-ui" class="hidden space-y-8 animate-in fade-in duration-700">
+        <aside id="sidebar-panel" class="absolute lg:static inset-y-0 left-0 w-[85%] lg:w-[420px] bg-white border-r z-[1050] flex flex-col no-print hidden-mobile lg:transform-none">
+            <div class="p-6 border-b space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 bg-slate-50 rounded-2xl border text-center">
+                        <p class="text-[8px] font-black text-slate-400 uppercase">Nodes</p>
+                        <h3 id="stat-members" class="text-xl font-black">0</h3>
+                    </div>
+                    <div class="p-3 bg-emerald-900 rounded-2xl shadow-lg text-white text-center">
+                        <p class="text-[8px] font-black text-emerald-300 uppercase leading-none mb-1">Ward Sum</p>
+                        <h3 id="stat-total-gca" class="text-[10px] font-black">KSh 0</h3>
+                    </div>
+                </div>
+                <input type="text" id="master-search" oninput="filterHierarchy()" placeholder="Scan Phone ID..." class="w-full px-5 py-3.5 bg-slate-50 rounded-2xl border-none text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div id="hierarchy-tree" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar scroll-smooth"></div>
+        </aside>
+
+        <main id="main-content" class="flex-1 bg-[#f1f5f9] overflow-y-auto p-4 md:p-8 no-scrollbar scroll-smooth">
             
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="glass-panel p-6 rounded-[2rem] border shadow-sm group">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-green-600 transition">Global Nodes</p>
-                    <h3 id="stat-members" class="text-4xl font-black mt-1">0</h3>
-                </div>
-                <div class="glass-panel p-6 rounded-[2rem] border shadow-sm">
-                    <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest">MSA Aggregate</p>
-                    <h3 id="stat-total-msa" class="text-2xl font-black mt-1 text-blue-600">KSh 0</h3>
-                </div>
-                <div class="glass-panel p-6 rounded-[2rem] border shadow-sm">
-                    <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">PSA Aggregate</p>
-                    <h3 id="stat-total-psa" class="text-2xl font-black mt-1 text-indigo-600">KSh 0</h3>
-                </div>
-                <div class="gradient-dark p-6 rounded-[2rem] text-white shadow-2xl shadow-green-900/20">
-                    <p class="text-[10px] font-black text-white/40 uppercase tracking-widest">GCA Total Value</p>
-                    <h3 id="stat-total-gca" class="text-2xl font-black mt-1 text-green-400">KSh 0</h3>
-                </div>
+            <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[3rem] shadow-2xl border p-12 text-center mt-10 no-print">
+                <i class="fas fa-fingerprint text-6xl text-emerald-600 mb-8"></i>
+                <h2 class="text-2xl font-black uppercase text-slate-800 tracking-tighter">Officer Access</h2>
+                <form id="login-form" class="mt-8 space-y-4">
+                    <input type="email" id="admin-email" placeholder="Officer ID" class="w-full p-4 rounded-xl border font-bold" required>
+                    <input type="password" id="admin-password" placeholder="Terminal PIN" class="w-full p-4 rounded-xl border font-bold" required>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-widest shadow-xl">Establish Link</button>
+                </form>
             </div>
 
-            <div id="request-panel" class="hidden bg-white rounded-[2.5rem] border-2 border-green-500 shadow-2xl p-6 md:p-8 mb-8 animate-bounce-short">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center space-x-3">
-                        <span class="flex h-3 w-3 rounded-full bg-green-500 animate-ping"></span>
-                        <h3 class="font-black uppercase text-xs text-green-700 tracking-[0.2em]">Pending Network Integrations</h3>
-                    </div>
-                    <button onclick="toggleRequests()" class="text-slate-300 hover:text-red-500 transition"><i class="fas fa-times-circle"></i></button>
-                </div>
-                <div id="request-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[40vh] overflow-y-auto custom-scrollbar"></div>
-            </div>
-
-            <div class="grid lg:grid-cols-12 gap-8">
+            <div id="member-dossier" class="hidden max-w-5xl mx-auto space-y-6 md:space-y-10 animate-fade">
                 
-                <div class="lg:col-span-4 space-y-6">
-                    <div class="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm sticky top-28">
-                        <div class="relative mb-6">
-                            <i class="fas fa-search absolute left-5 top-4.5 text-slate-300 text-xs"></i>
-                            <input type="text" id="master-search" oninput="filterHierarchy()" placeholder="Scan Node Identity / Phone..." class="w-full pl-12 pr-6 py-4 rounded-2xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 text-[11px] font-bold uppercase">
-                        </div>
-                        <div id="hierarchy-tree" class="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                <div class="member-card p-6 md:p-12 relative flex flex-col md:flex-row items-center md:items-start justify-between gap-8 overflow-hidden">
+                    <div class="self-start p-2 bg-white border rounded-2xl shadow-sm no-print mb-4 md:mb-0">
+                        <div id="qrcode"></div>
+                    </div>
+                    <div class="flex-1 md:ml-12 text-center md:text-left">
+                        <p id="bio-location-path" class="text-[9px] md:text-[10px] font-black text-emerald-600 uppercase tracking-[0.4em] mb-3 leading-none">---</p>
+                        <h2 id="active-name" class="text-4xl md:text-7xl font-black uppercase tracking-tighter text-slate-900 leading-[0.85] mb-8">---</h2>
+                        <div class="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                            <button onclick="speakBalance()" class="bg-slate-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl no-print active:scale-95 transition-all">Somesha Salio</button>
+                            <div class="text-left border-l-2 border-slate-100 pl-4">
+                                <p class="text-[8px] font-black text-slate-400 uppercase">Trust score</p>
+                                <p id="trust-score" class="text-xl font-black text-emerald-600">100/100</p>
                             </div>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-right w-full md:w-auto pt-6 border-t md:border-t-0 border-slate-100">
+                        <p class="text-[10px] md:text-[11px] font-black text-slate-400 uppercase mb-2">Lifetime Cumulative Savings</p>
+                        <h2 id="active-grand-total" class="text-6xl md:text-8xl font-black text-emerald-600 tracking-tighter leading-none">KSh 0</h2>
+                        <div class="mt-4">
+                            <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1 leading-none">Projected Harvest [cite: 83]</p>
+                            <p id="yield-projection" class="text-sm font-black text-amber-600 leading-none tracking-widest uppercase">---</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="lg:col-span-8 space-y-6">
-                    <div class="bg-white rounded-[3.5rem] shadow-2xl border border-slate-100 overflow-hidden min-h-[70vh] flex flex-col">
-                        
-                        <div id="sync-placeholder" class="flex-1 flex flex-col items-center justify-center text-center p-12">
-                            <div class="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-dashed border-slate-200">
-                                <i class="fas fa-shield-virus text-4xl text-slate-200"></i>
-                            </div>
-                            <h4 class="text-xs font-black uppercase text-slate-400 tracking-[0.4em]">Forensic Offline</h4>
-                            <p class="text-[10px] text-slate-300 mt-2 max-w-xs uppercase leading-relaxed font-bold">Select a network node from the directory to initiate a secure forensic synchronization</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm border-msa">
+                        <h4 class="text-[9px] font-black uppercase text-msa mb-2 leading-none">MSA [cite: 66]</h4>
+                        <input type="number" id="inp-msa" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm border-gff">
+                        <h4 class="text-[9px] font-black uppercase text-gff mb-2 leading-none">GFF [cite: 67]</h4>
+                        <input type="number" id="inp-gff" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm border-gmf">
+                        <h4 class="text-[9px] font-black uppercase text-gmf mb-2 leading-none">GMF [cite: 68]</h4>
+                        <input type="number" id="inp-gmf" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm border-gsf">
+                        <h4 class="text-[9px] font-black uppercase text-gsf mb-2 leading-none">GSF [cite: 69]</h4>
+                        <input type="number" id="inp-gsf" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm border-psa">
+                        <h4 class="text-[9px] font-black uppercase text-psa mb-2 leading-none">PSA [cite: 70]</h4>
+                        <input type="number" id="inp-psa" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border shadow-sm border-fis">
+                        <h4 class="text-[9px] font-black uppercase text-fis mb-2 leading-none">FIS [cite: 71]</h4>
+                        <input type="number" id="inp-fis" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm border-gca">
+                        <h4 class="text-[9px] font-black uppercase text-gca mb-2 leading-none">GCA [cite: 72]</h4>
+                        <input type="number" id="inp-gca" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                    <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm border-afs">
+                        <h4 class="text-[9px] font-black uppercase text-afs mb-2 leading-none">AFS [cite: 73]</h4>
+                        <input type="number" id="inp-afs" class="w-full text-xl md:text-3xl font-black outline-none bg-transparent" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 md:p-12 rounded-[4rem] border shadow-sm no-print space-y-6 evidence-input-zone">
+                    <h4 class="text-[11px] font-black uppercase text-slate-400 tracking-[0.2em] border-b pb-4">Accountability Proof Nodes</h4>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <label class="text-[9px] font-black uppercase text-slate-400 ml-2">M-Pesa Confirmation Message</label>
+                            <textarea id="evidence-msg" class="w-full p-6 rounded-3xl border bg-slate-50 font-bold text-xs leading-relaxed" rows="4" placeholder="Paste full M-Pesa SMS packet here..."></textarea>
                         </div>
+                        <div class="space-y-3">
+                            <label class="text-[9px] font-black uppercase text-slate-400 ml-2">M-Pesa Transaction Screenshot</label>
+                            <input type="file" id="evidence-img" class="w-full p-5 rounded-3xl border bg-slate-50 font-bold text-xs" accept="image/*">
+                        </div>
+                    </div>
+                </div>
 
-                        <div id="sync-interface" class="hidden flex flex-col h-full animate-in slide-in-from-bottom-4 duration-500">
-                            <div class="gradient-dark p-10 md:p-14 text-white hero-pattern relative">
-                                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                                    <div>
-                                        <div class="flex items-center gap-3 mb-3">
-                                            <div id="lock-indicator" class="text-lg"></div>
-                                            <span class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-lg text-[8px] font-black uppercase tracking-widest text-green-400">Active Node</span>
-                                        </div>
-                                        <h2 id="active-name" class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">---</h2>
-                                        <div class="flex items-center space-x-4">
-                                            <p id="active-phone" class="text-[11px] font-mono text-green-400 font-bold uppercase bg-black/20 px-3 py-1 rounded-md"></p>
-                                            <button onclick="viewLedger()" class="text-[9px] font-black uppercase tracking-widest hover:text-green-400 transition underline underline-offset-4">Audit History</button>
-                                        </div>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-[8px] font-black text-green-300 uppercase mb-3 tracking-[0.2em]">Forensic Integrity</p>
-                                        <div id="scan-indicator" class="px-6 py-3 bg-white/5 backdrop-blur-md rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/10">Waiting...</div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="bg-white p-8 md:p-14 rounded-[4rem] border shadow-sm space-y-12">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-6 border-b pb-10">
+                        <h4 class="text-[11px] font-black uppercase text-slate-400 tracking-[0.3em]">Official Accountability node Timeline</h4>
+                        <button onclick="commitSync()" id="sync-btn" class="w-full md:w-auto bg-emerald-700 text-white font-black px-12 py-6 rounded-[2rem] uppercase text-[10px] tracking-widest shadow-2xl no-print hover:bg-emerald-900 transition-all">Commit Strategic Sync Packet</button>
+                    </div>
+                    <div id="audit-history-timeline" class="space-y-12">
+                        </div>
+                </div>
 
-                            <div class="p-8 md:p-14 flex-1">
-                                <form id="audit-form" class="space-y-10">
-                                    <div class="grid md:grid-cols-2 gap-10">
-                                        <div class="space-y-4">
-                                            <div class="flex items-center space-x-2 ml-2">
-                                                <i class="fas fa-user-shield text-indigo-500 text-xs"></i>
-                                                <h4 class="text-[10px] font-black uppercase text-indigo-500 tracking-widest">Personal Assets (PSA)</h4>
-                                            </div>
-                                            <div class="bg-slate-50 p-8 rounded-[2.5rem] space-y-4 border border-slate-100 shadow-inner">
-                                                <div>
-                                                    <label class="text-[8px] font-black uppercase text-slate-400 ml-1">PSA Savings</label>
-                                                    <input type="number" id="inp-psa" class="w-full p-4 mt-1 rounded-xl border bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[8px] font-black uppercase text-slate-400 ml-1">Asset Finance (AFS)</label>
-                                                    <input type="number" id="inp-afs" class="w-full p-4 mt-1 rounded-xl border bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[8px] font-black uppercase text-slate-400 ml-1">Farm Inputs (FIS)</label>
-                                                    <input type="number" id="inp-fis" class="w-full p-4 mt-1 rounded-xl border bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-indigo-500">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="space-y-4">
-                                            <div class="flex items-center space-x-2 ml-2">
-                                                <i class="fas fa-university text-blue-500 text-xs"></i>
-                                                <h4 class="text-[10px] font-black uppercase text-blue-500 tracking-widest">Regulated Assets (MSA)</h4>
-                                            </div>
-                                            <div class="bg-slate-50 p-8 rounded-[2.5rem] space-y-4 border border-slate-100 shadow-inner">
-                                                <div>
-                                                    <label class="text-[8px] font-black uppercase text-slate-400 ml-1">Member Savings</label>
-                                                    <input type="number" id="inp-msa" class="w-full p-4 mt-1 rounded-xl border border-blue-100 bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[8px] font-black uppercase text-slate-400 ml-1">Group Fines</label>
-                                                    <input type="number" id="inp-gff" class="w-full p-4 mt-1 rounded-xl border bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                                <div>
-                                                    <label class="text-[8px] font-black uppercase text-slate-400 ml-1">Mwalimu Fund</label>
-                                                    <input type="number" id="inp-gmf" class="w-full p-4 mt-1 rounded-xl border bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="pt-6">
-                                        <div id="drop-zone" class="w-full bg-slate-50 p-12 rounded-[3rem] border-2 border-dashed border-slate-200 text-center relative hover:bg-slate-100 transition group cursor-pointer">
-                                            <input type="file" id="audit-photo" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
-                                            <div id="upload-content">
-                                                <i class="fas fa-qrcode text-5xl text-slate-300 mb-4 group-hover:text-green-600 transition group-hover:scale-110"></i>
-                                                <p id="file-label" class="text-[11px] font-black uppercase text-slate-500 tracking-widest">Verify M-PESA Packet Screenshot</p>
-                                                <p class="text-[8px] text-slate-400 mt-2 font-bold uppercase tracking-tighter">Maximum Age: 60 Minutes • Software Signature Required</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div id="forensic-report" class="hidden mt-6 p-5 bg-red-50 border border-red-100 rounded-2xl flex items-center space-x-4">
-                                            <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                                                <i class="fas fa-shield-alt"></i>
-                                            </div>
-                                            <p id="error-text" class="text-[10px] font-black text-red-600 uppercase tracking-widest leading-relaxed"></p>
-                                        </div>
-
-                                        <p id="lock-error" class="text-center text-[10px] font-black text-red-500 uppercase mt-6 tracking-widest hidden">Access denied: Node currently locked for verification cooling</p>
-                                        
-                                        <button type="submit" id="sync-btn" class="w-full mt-8 bg-slate-900 text-white font-black py-8 rounded-[2.5rem] shadow-2xl hover:bg-green-700 transition uppercase tracking-[0.3em] text-xs disabled:opacity-30 disabled:cursor-not-allowed">Execute Strategic Sync</button>
-                                    </div>
-                                </form>
-                            </div>
+                <div class="grid lg:grid-cols-2 gap-6 pb-20">
+                    <div class="bg-white p-8 rounded-[3rem] border space-y-6">
+                        <p class="text-[9px] font-black uppercase text-slate-300">Biometric Verification</p>
+                        <img id="view-sign" src="" class="h-44 w-full object-contain bg-slate-50 rounded-3xl border grayscale p-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <img id="view-id-front" class="h-40 w-full object-cover rounded-2xl border">
+                            <img id="view-id-back" class="h-40 w-full object-cover rounded-2xl border">
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-[3rem] border flex flex-col justify-center space-y-6">
+                        <div class="space-y-4">
+                            <p class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-slate-400">Village Hub: <span id="p-village" class="font-black text-emerald-800 uppercase">---</span></p>
+                            <p class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-slate-400">Node Mobile: <span id="p-phone" class="font-black text-slate-900 font-mono">---</span></p>
+                        </div>
+                        <div class="pt-10 border-t text-[9px] text-slate-400 font-bold uppercase text-center leading-relaxed">
+                            <p>This is an official system statement. Lifetime cumulative totals represent the sum of all historical verified audit packets stored in the IIG Master Ledger.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
-
-    <div id="onboard-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[500] hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-lg rounded-[3.5rem] p-10 md:p-14 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
-            <div class="text-center space-y-2">
-                <h3 class="text-2xl font-black uppercase tracking-tighter">Node Onboarding</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manual Network Integration Registry</p>
-            </div>
-            <form id="onboard-form" class="space-y-4">
-                <input type="text" id="on-name" placeholder="Full Legal Identity" class="w-full p-5 rounded-2xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required>
-                <input type="text" id="on-phone" placeholder="Registry Mobile Number" class="w-full p-5 rounded-2xl border bg-slate-50 outline-none font-bold text-sm focus:ring-2 focus:ring-green-500" required>
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="on-center" onchange="filterOnboardGroups()" class="w-full p-5 rounded-2xl border bg-slate-50 outline-none font-bold text-xs uppercase" required></select>
-                    <select id="on-group" class="w-full p-5 rounded-2xl border bg-slate-50 outline-none font-bold text-xs uppercase" required></select>
-                </div>
-                <div class="flex gap-4 pt-6">
-                    <button type="button" onclick="document.getElementById('onboard-modal').classList.add('hidden')" class="flex-1 py-5 bg-slate-100 rounded-2xl font-black uppercase text-[10px] hover:bg-slate-200 transition">Abort</button>
-                    <button type="submit" class="flex-1 py-5 bg-green-900 text-white rounded-2xl font-black uppercase text-[10px] shadow-xl hover:bg-green-700 transition">Integrate Node</button>
-                </div>
-            </form>
-        </div>
+        </main>
     </div>
 
     <script>
@@ -280,288 +218,217 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth(), database = firebase.database();
 
-        let db_centers = {}, db_groups = {}, db_members = {}, db_requests = {};
+        let CACHE = { centers: {}, groups: {}, members: {}, audits: {} };
         let activeMemberId = null;
-        const LOCK_TIME = 5 * 60 * 60 * 1000; // 5 Hour Security Lock
+        const qrcode = new QRCode(document.getElementById("qrcode"), { width: 85, height: 85 });
 
-        // --- Auth Guard ---
         auth.onAuthStateChanged(user => {
-            const whitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
-            if (user && whitelist.includes(user.email)) {
+            if (user) {
                 document.getElementById('login-ui').classList.add('hidden');
-                document.getElementById('dashboard-ui').classList.remove('hidden');
-                document.getElementById('auth-status').classList.remove('hidden');
-                startTerminalSync();
+                document.getElementById('nav-actions').classList.remove('hidden');
+                startSync();
             }
         });
 
         document.getElementById('login-form').onsubmit = (e) => {
             e.preventDefault();
-            auth.signInWithEmailAndPassword(document.getElementById('admin-email').value, document.getElementById('admin-password').value).catch(err => alert("Registry Access Denied: " + err.message));
+            auth.signInWithEmailAndPassword(document.getElementById('admin-email').value, document.getElementById('admin-password').value);
         };
 
-        // --- Data Stream ---
-        function startTerminalSync() {
-            database.ref('organization/centers').on('value', s => { db_centers = s.val() || {}; renderTree(); updateOnboardDropdowns(); });
-            database.ref('organization/groups').on('value', s => { db_groups = s.val() || {}; renderTree(); updateOnboardDropdowns(); });
-            database.ref('records/members').on('value', s => { db_members = s.val() || {}; renderTree(); updateLockState(); });
-            database.ref('requests/onboarding').on('value', s => { db_requests = s.val() || {}; renderRequests(); });
-        }
-
-        // --- Forensic Core ---
-        async function validateImageIntegrity(file) {
-            return new Promise((resolve, reject) => {
-                const indicator = document.getElementById('scan-indicator');
-                const errorLog = document.getElementById('forensic-report');
-                const errorText = document.getElementById('error-text');
-                const dropZone = document.getElementById('drop-zone');
-
-                indicator.innerText = "SCANNING METADATA...";
-                indicator.className = "px-6 py-3 bg-yellow-500 text-white rounded-2xl text-[10px] font-black uppercase animate-pulse";
-                errorLog.classList.add('hidden');
-                dropZone.classList.remove('fraud-alert');
-
-                EXIF.getData(file, function() {
-                    const metadata = EXIF.getAllTags(this);
-                    const software = metadata.Software || "";
-                    const creationDate = metadata.DateTimeOriginal || metadata.DateTime || "";
-                    
-                    // Forensic Check 1: Software Signature
-                    const blacklistedApps = ["Photoshop", "Canva", "PicsArt", "Lightroom", "Snapseed", "Pixlr", "Instagram", "Editor"];
-                    const isEdited = blacklistedApps.some(app => software.toLowerCase().includes(app.toLowerCase()));
-
-                    if (isEdited) return reject(`FORENSIC ALERT: Manipulation Detected. Packet processed via ${software}`);
-
-                    // Forensic Check 2: Temporal Validity
-                    const imageTime = creationDate ? new Date(creationDate.replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1/$2/$3")).getTime() : file.lastModified;
-                    const ageInMinutes = (Date.now() - imageTime) / (1000 * 60);
-
-                    if (ageInMinutes > 60) return reject(`VALIDATION FAILED: Temporal drift detected (${Math.floor(ageInMinutes)}m old). Max allowed: 60m.`);
-
-                    indicator.innerText = "VERIFIED INTEGRITY";
-                    indicator.className = "px-6 py-3 bg-green-600 text-white rounded-2xl text-[10px] font-black uppercase";
-                    resolve(true);
-                });
+        function startSync() {
+            database.ref('organization/centers').on('value', s => { CACHE.centers = s.val() || {}; renderTree(); });
+            database.ref('organization/groups').on('value', s => { CACHE.groups = s.val() || {}; renderTree(); });
+            database.ref('records/members').on('value', s => { 
+                CACHE.members = s.val() || {}; 
+                renderTree(); 
+                if(activeMemberId) populateDossier(activeMemberId);
             });
         }
 
-        document.getElementById('audit-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('sync-btn');
-            const photo = document.getElementById('audit-photo').files[0];
-            
-            if(!photo) return alert("Security Packet Required for Node Sync.");
-
-            try {
-                const isValid = await validateImageIntegrity(photo);
-                if (isValid) {
-                    btn.innerText = "ENCRYPTING & UPLOADING...";
-                    btn.disabled = true;
-
-                    const reader = new FileReader();
-                    reader.readAsDataURL(photo);
-                    reader.onload = async () => {
-                        const financials = {
-                            psa: parseFloat(document.getElementById('inp-psa').value || 0),
-                            afs: parseFloat(document.getElementById('inp-afs').value || 0),
-                            fis: parseFloat(document.getElementById('inp-fis').value || 0),
-                            msa: parseFloat(document.getElementById('inp-msa').value || 0),
-                            gff: parseFloat(document.getElementById('inp-gff').value || 0),
-                            gmf: parseFloat(document.getElementById('inp-gmf').value || 0),
-                            lastAuditTime: Date.now(),
-                            securityStamp: "PASSED_V8.0"
-                        };
-                        
-                        await database.ref(`records/members/${activeMemberId}/financials`).set(financials);
-                        await database.ref('records/audits').push({
-                            farmerPhone: db_members[activeMemberId].phone,
-                            timestamp: Date.now(),
-                            officer: auth.currentUser.email,
-                            financials: financials,
-                            media: reader.result
-                        });
-                        
-                        alert("Node Synchronization Complete.");
-                        location.reload();
-                    };
-                }
-            } catch (err) {
-                document.getElementById('forensic-report').classList.remove('hidden');
-                document.getElementById('error-text').innerText = err;
-                document.getElementById('drop-zone').classList.add('fraud-alert');
-                document.getElementById('scan-indicator').innerText = "REJECTED";
-                document.getElementById('scan-indicator').className = "px-6 py-3 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase";
-                btn.disabled = false;
-            }
-        };
-
-        // --- UI & Rendering ---
         function renderTree() {
             const tree = document.getElementById('hierarchy-tree');
             tree.innerHTML = "";
-            let sums = { gca: 0, msa: 0, psa: 0, count: 0 };
+            let sums = { global: 0, count: 0 };
 
-            Object.entries(db_centers).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([cId, center]) => {
-                const groups = Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cId);
-                let cTotal = 0;
-
-                const groupHtml = groups.map(([gId, group]) => {
-                    const members = Object.entries(db_members).filter(([_, m]) => m.groupId === gId);
-                    let gTotal = 0;
-
-                    const membersHtml = members.map(([mId, m]) => {
+            Object.entries(CACHE.centers).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([cId, center]) => {
+                let cSum = 0;
+                const groups = Object.entries(CACHE.groups).filter(([_, g]) => g.parentCenter === cId);
+                const groupHTML = groups.map(([gId, group]) => {
+                    let gSum = 0;
+                    const members = Object.entries(CACHE.members).filter(([_, m]) => m.groupId === gId);
+                    const memberHTML = members.map(([mId, m]) => {
                         sums.count++;
-                        const f = m.financials || {};
-                        const mSum = (parseFloat(f.msa)||0) + (parseFloat(f.gff)||0) + (parseFloat(f.gmf)||0);
-                        const pSum = (parseFloat(f.psa)||0) + (parseFloat(f.afs)||0) + (parseFloat(f.fis)||0);
-                        const nodeTotal = mSum + pSum;
-                        sums.msa += mSum; sums.psa += pSum; sums.gca += nodeTotal; gTotal += nodeTotal;
-
-                        const isLocked = (Date.now() - (f.lastAuditTime || 0)) < LOCK_TIME;
-                        const icon = isLocked ? 'fas fa-shield-check text-green-500' : 'far fa-circle text-slate-300';
-
-                        return `
-                            <div id="node-${mId}" onclick="selectNode('${mId}')" class="member-node p-4 border rounded-2xl flex justify-between items-center bg-white mb-2" data-search="${m.name.toLowerCase()} ${m.phone}">
-                                <div class="flex items-center space-x-3">
-                                    <i class="${icon} text-[10px]"></i>
-                                    <div>
-                                        <p class="font-black text-[10px] uppercase leading-none text-slate-700">${m.name}</p>
-                                        <p class="text-[8px] font-mono text-slate-400 mt-1">${m.phone}</p>
-                                    </div>
-                                </div>
-                                <p class="text-[10px] font-black text-green-700">KSh ${nodeTotal.toLocaleString()}</p>
-                            </div>`;
+                        const bal = calculatePacketTotal(m.financials);
+                        gSum += bal;
+                        return `<div onclick="selectMember('${mId}')" class="p-4 flex justify-between items-center bg-white rounded-2xl mb-1.5 border-l-4 border-transparent ${activeMemberId === mId ? 'border-emerald-500 bg-emerald-50' : ''}">
+                                    <span class="text-[10px] font-black uppercase text-slate-700 truncate mr-2">${m.name}</span>
+                                    <span class="text-[10px] font-black text-emerald-600">KSh ${bal.toLocaleString()}</span>
+                                </div>`;
                     }).join('');
-
-                    cTotal += gTotal;
-                    return `
-                        <div class="group-node pl-4 mb-4">
-                            <div class="flex justify-between items-center cursor-pointer mb-2" onclick="toggleVis('g-${gId}')">
-                                <span class="text-[10px] font-black uppercase text-blue-600 tracking-widest">${group.name}</span>
-                                <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-lg">KSh ${gTotal.toLocaleString()}</span>
-                            </div>
-                            <div id="g-${gId}" class="hidden space-y-1">${membersHtml || '<p class="text-[8px] text-center italic text-slate-300">No Nodes Registered</p>'}</div>
-                        </div>`;
+                    cSum += gSum;
+                    return `<div class="mb-3 p-3 bg-slate-50/50 rounded-3xl border border-slate-100">
+                                <div class="flex justify-between items-center p-2 cursor-pointer" onclick="toggleNode('g-${gId}')">
+                                    <span class="text-[9px] font-black uppercase text-blue-600">${group.name}</span>
+                                    <span class="text-[9px] font-bold text-slate-400">KSh ${gSum.toLocaleString()}</span>
+                                </div>
+                                <div id="g-${gId}" class="hidden mt-3">${memberHTML || '<p class="text-[8px] text-center italic py-2">Empty</p>'}</div>
+                            </div>`;
                 }).join('');
 
-                tree.innerHTML += `
-                    <div class="center-node p-5 border bg-white mb-3 rounded-[2rem] shadow-sm">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleVis('c-${cId}')">
-                            <h3 class="font-black text-[11px] uppercase text-slate-800 tracking-[0.1em]">${center.name} Centre</h3>
-                            <p class="text-[10px] font-black text-green-700">KSh ${cTotal.toLocaleString()}</p>
-                        </div>
-                        <div id="c-${cId}" class="hidden mt-6">${groupHtml}</div>
-                    </div>`;
+                sums.global += cSum;
+                tree.innerHTML += `<div class="p-6 bg-white rounded-[2.5rem] border shadow-sm mb-4">
+                                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleNode('c-${cId}')">
+                                            <h3 class="font-black text-[11px] uppercase text-emerald-900">${center.name} Hub</h3>
+                                            <span class="text-[11px] font-black text-emerald-700">KSh ${cSum.toLocaleString()}</span>
+                                        </div>
+                                        <div id="c-${cId}" class="hidden mt-6">${groupHTML}</div>
+                                    </div>`;
             });
-
             document.getElementById('stat-members').innerText = sums.count;
-            document.getElementById('stat-total-msa').innerText = `KSh ${sums.msa.toLocaleString()}`;
-            document.getElementById('stat-total-psa').innerText = `KSh ${sums.psa.toLocaleString()}`;
-            document.getElementById('stat-total-gca').innerText = `KSh ${sums.gca.toLocaleString()}`;
+            document.getElementById('stat-total-gca').innerText = `KSh ${sums.global.toLocaleString()}`;
         }
 
-        function selectNode(id) {
-            activeMemberId = id;
-            const m = db_members[id];
-            document.querySelectorAll('.member-node').forEach(el => el.classList.remove('active-node'));
-            document.getElementById(`node-${id}`).classList.add('active-node');
-            
-            document.getElementById('sync-placeholder').classList.add('hidden');
-            document.getElementById('sync-interface').classList.remove('hidden');
+        async function selectMember(mId) {
+            activeMemberId = mId;
+            document.getElementById('member-dossier').classList.remove('hidden');
+            if(window.innerWidth < 1024) toggleSidebar();
+            renderTree(); populateDossier(mId);
+        }
+
+        async function populateDossier(mId) {
+            const m = CACHE.members[mId];
+            if(!m) return;
+
             document.getElementById('active-name').innerText = m.name;
-            document.getElementById('active-phone').innerText = `MASTER REGISTRY: ${m.phone}`;
-            document.getElementById('scan-indicator').innerText = "WAITING...";
-            document.getElementById('scan-indicator').className = "px-6 py-3 bg-white/5 rounded-2xl text-[10px] font-black uppercase border border-white/10";
+            document.getElementById('p-phone').innerText = m.phone;
+            document.getElementById('p-village').innerText = m.geo?.village || "NOT RECORDED";
+            document.getElementById('bio-location-path').innerText = `${CACHE.centers[m.centerId]?.name || 'HUB'} HUB > ${CACHE.groups[m.groupId]?.name || 'GROUP'} NODE`;
             
             const f = m.financials || {};
-            ['psa', 'afs', 'fis', 'msa', 'gff', 'gmf'].forEach(key => document.getElementById(`inp-${key}`).value = f[key] || 0);
-            updateLockState();
+            ['msa', 'gff', 'gmf', 'gsf', 'psa', 'fis', 'gca', 'afs'].forEach(k => document.getElementById(`inp-${k}`).value = f[k] || 0);
+            
+            const snap = await database.ref('records/audits').orderByChild('farmerPhone').equalTo(m.phone).once('value');
+            let lifetimeSum = 0;
+            let audits = [];
+            snap.forEach(child => {
+                const a = child.val();
+                lifetimeSum += calculatePacketTotal(a.financials);
+                audits.push(a);
+            });
+
+            document.getElementById('active-grand-total').innerText = `KSh ${lifetimeSum.toLocaleString()}`;
+            document.getElementById('yield-projection').innerText = `KSh ${(f.fis * 3.8).toLocaleString()}`;
+            document.getElementById('trust-score').innerText = `${Math.min(100, audits.length * 10)}/100`;
+
+            // FULL BREAKDOWN TIMELINE RENDERING
+            let logHTML = "";
+            audits.reverse().forEach(a => {
+                const af = a.financials || {};
+                const packetSum = calculatePacketTotal(af);
+                logHTML += `
+                    <div class="p-8 md:p-12 bg-slate-50 rounded-[3.5rem] border animate-fade audit-entry">
+                        <div class="flex flex-col md:flex-row justify-between items-start border-b pb-6 mb-8 gap-4">
+                            <div>
+                                <p class="text-[11px] font-black text-slate-900 uppercase">${new Date(a.timestamp).toLocaleString()}</p>
+                                <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase">Officer Node: ${a.officer.split('@')[0]}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] font-black text-emerald-600 mb-1 uppercase tracking-widest leading-none">Audit Node Sum</p>
+                                <p class="text-4xl font-black text-slate-900 leading-none">KSh ${packetSum.toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-emerald-500 text-emerald-700 shadow-sm font-black text-[10px]">MSA: ${parseFloat(af.msa||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-red-500 text-red-700 shadow-sm font-black text-[10px]">GFF: ${parseFloat(af.gff||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-sky-500 text-sky-600 shadow-sm font-black text-[10px]">GMF: ${parseFloat(af.gmf||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-blue-500 text-blue-700 shadow-sm font-black text-[10px]">GSF: ${parseFloat(af.gsf||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-purple-500 text-purple-700 shadow-sm font-black text-[10px]">PSA: ${parseFloat(af.psa||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-amber-500 text-amber-700 shadow-sm font-black text-[10px]">FIS: ${parseFloat(af.fis||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-emerald-900 text-emerald-900 shadow-sm font-black text-[10px]">GCA: ${parseFloat(af.gca||0).toLocaleString()}</div>
+                            <div class="bg-white p-4 rounded-2xl border-l-4 border-l-pink-500 text-pink-700 shadow-sm font-black text-[10px]">AFS: ${parseFloat(af.afs||0).toLocaleString()}</div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-10 border-t pt-8">
+                            <div class="space-y-4">
+                                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">M-Pesa Validation Message</p>
+                                <div class="bg-white p-6 rounded-3xl border text-[11px] font-bold text-slate-600 italic leading-relaxed shadow-sm">${a.mpesaMsg || "No text evidence recorded."}</div>
+                            </div>
+                            <div class="space-y-4">
+                                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest">M-Pesa Verification Image</p>
+                                ${a.mpesaImg ? `<img src="${a.mpesaImg}" class="h-64 w-full object-cover rounded-[2.5rem] border shadow-md cursor-zoom-in" onclick="window.open(this.src)">` : `<div class="h-64 w-full bg-slate-100 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400"><i class="fas fa-image text-3xl mb-3 opacity-20"></i><p class="text-[9px] font-black uppercase">No Image Proof Stored</p></div>`}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('audit-history-timeline').innerHTML = logHTML || '<p class="text-[10px] text-center italic py-20 opacity-30">No Node History Found.</p>';
+            
+            document.getElementById('view-sign').src = m.signature || "";
+            document.getElementById('view-id-front').src = m.idImages?.front || "";
+            document.getElementById('view-id-back').src = m.idImages?.back || "";
+            qrcode.makeCode(`IIG_MASTER_AUDIT_${mId}_SUM_${lifetimeSum}`);
         }
 
-        function updateLockState() {
+        async function commitSync() {
             if(!activeMemberId) return;
-            const f = db_members[activeMemberId].financials || {};
-            const remaining = LOCK_TIME - (Date.now() - (f.lastAuditTime || 0));
-            const isLocked = remaining > 0;
-            const btn = document.getElementById('sync-btn'), err = document.getElementById('lock-error'), indicator = document.getElementById('lock-indicator');
+            const btn = document.getElementById('sync-btn');
+            const msgInput = document.getElementById('evidence-msg');
+            const imgInput = document.getElementById('evidence-img');
 
-            if(isLocked) {
-                btn.disabled = true;
-                err.classList.remove('hidden');
-                indicator.innerHTML = '<i class="fas fa-lock text-red-500"></i>';
-                err.innerText = `SECURITY LOCK ACTIVE: ${Math.ceil(remaining/60000)} MINS REMAINING`;
-            } else {
-                btn.disabled = false;
-                err.classList.add('hidden');
-                indicator.innerHTML = '<i class="fas fa-unlock text-green-500"></i>';
+            if(!msgInput.value) return alert("Accountability Error: M-Pesa Message is required.");
+            
+            btn.disabled = true; btn.innerText = "Transmitting Packet...";
+
+            let b64Img = "";
+            if(imgInput.files[0]) {
+                const reader = new FileReader();
+                b64Img = await new Promise(r => { reader.onload = () => r(reader.result); reader.readAsDataURL(imgInput.files[0]); });
             }
+
+            const fin = {
+                msa: parseFloat(document.getElementById('inp-msa').value || 0),
+                gff: parseFloat(document.getElementById('inp-gff').value || 0),
+                gmf: parseFloat(document.getElementById('inp-gmf').value || 0),
+                gsf: parseFloat(document.getElementById('inp-gsf').value || 0),
+                psa: parseFloat(document.getElementById('inp-psa').value || 0),
+                fis: parseFloat(document.getElementById('inp-fis').value || 0),
+                gca: parseFloat(document.getElementById('inp-gca').value || 0),
+                afs: parseFloat(document.getElementById('inp-afs').value || 0),
+                timestamp: Date.now()
+            };
+            try {
+                await database.ref(`records/members/${activeMemberId}/financials`).set(fin);
+                await database.ref('records/audits').push({
+                    farmerPhone: CACHE.members[activeMemberId].phone,
+                    officer: auth.currentUser.email,
+                    timestamp: Date.now(),
+                    financials: fin,
+                    mpesaMsg: msgInput.value,
+                    mpesaImg: b64Img
+                });
+                msgInput.value = ""; imgInput.value = "";
+                alert("Strategic Synchronization Successful.");
+            } catch (e) { alert(e.message); }
+            btn.disabled = false; btn.innerText = "Commit Strategic Sync Packet";
         }
 
-        // --- Helpers ---
-        function toggleVis(id) { document.getElementById(id).classList.toggle('hidden'); }
-        function toggleRequests() { document.getElementById('request-panel').classList.toggle('hidden'); }
-        function openOnboard() { document.getElementById('onboard-modal').classList.remove('hidden'); }
-        
+        function toggleSidebar() { 
+            document.getElementById('sidebar-panel').classList.toggle('hidden-mobile'); 
+            document.getElementById('sidebar-overlay')?.classList.toggle('hidden');
+        }
+        function toggleNode(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function calculatePacketTotal(f) {
+            return f ? (Object.values(f).filter(v => typeof v === 'number').reduce((a, b) => a + b, 0)) : 0;
+        }
+        function speakBalance() {
+            const m = CACHE.members[activeMemberId];
+            const msg = new SpeechSynthesisUtterance(`Habari ${m.name}. Salio lako la jumla ni shilingi ya Kenya, ${document.getElementById('active-grand-total').innerText}. Asanti.`);
+            msg.lang = 'sw-KE'; window.speechSynthesis.speak(msg);
+        }
         function filterHierarchy() {
             const term = document.getElementById('master-search').value.toLowerCase();
-            document.querySelectorAll('.member-node').forEach(node => {
-                node.classList.toggle('hidden', !node.dataset.search.includes(term));
+            document.querySelectorAll('#hierarchy-tree .p-4').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(term) ? 'flex' : 'none';
             });
         }
-
-        document.getElementById('audit-photo').onchange = (e) => { 
-            if(e.target.files[0]) {
-                document.getElementById('file-label').innerText = "SELECTED: " + e.target.files[0].name;
-                validateImageIntegrity(e.target.files[0]).catch(e => console.log("Init scan blocked"));
-            }
-        };
-
-        function updateOnboardDropdowns() {
-            let opts = '<option value="">Target Centre</option>';
-            Object.entries(db_centers).forEach(([id, c]) => opts += `<option value="${id}">${c.name}</option>`);
-            document.getElementById('on-center').innerHTML = opts;
-        }
-
-        function filterOnboardGroups() {
-            const cid = document.getElementById('on-center').value;
-            let opts = '<option value="">Target Group</option>';
-            Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cid).forEach(([id, g]) => opts += `<option value="${id}">${g.name}</option>`);
-            document.getElementById('on-group').innerHTML = opts;
-        }
-
-        function renderRequests() {
-            const list = document.getElementById('request-list'), badge = document.getElementById('notif-count');
-            let count = 0; list.innerHTML = "";
-            Object.entries(db_requests).forEach(([id, r]) => {
-                if(r.status === 'pending') {
-                    count++;
-                    list.innerHTML += `
-                        <div class="p-5 bg-slate-50 border rounded-[2rem] flex justify-between items-center group hover:bg-white hover:shadow-xl transition">
-                            <div>
-                                <p class="font-black text-[10px] uppercase text-slate-800">${r.name}</p>
-                                <p class="text-[8px] font-bold text-slate-400 uppercase mt-1">Pending Integration</p>
-                            </div>
-                            <button onclick="approveRequest('${id}')" class="bg-blue-600 text-white text-[8px] font-black px-4 py-2 rounded-xl uppercase hover:bg-blue-700 transition">Integrate</button>
-                        </div>`;
-                }
-            });
-            badge.innerText = count; badge.classList.toggle('hidden', count === 0);
-        }
-
-        document.getElementById('onboard-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const node = {
-                name: document.getElementById('on-name').value,
-                phone: document.getElementById('on-phone').value,
-                centerId: document.getElementById('on-center').value,
-                groupId: document.getElementById('on-group').value,
-                status: 'active',
-                financials: { lastAuditTime: 0 }
-            };
-            await database.ref('records/members').push(node);
-            alert("New Node Successfully Integrated into Global Registry.");
-            document.getElementById('onboard-modal').classList.add('hidden');
-        };
     </script>
 </body>
 </html>

@@ -1,0 +1,125 @@
+{
+
+  "rules": {
+
+    "users": {
+
+      "$uid": {
+
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com' || auth.token.email === 'iigaccountant@gmail.com')",
+
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com' || auth.token.email === 'iigaccountant@gmail.com')"
+
+      }
+
+    },
+
+
+
+    "activities": {
+
+      ".read": true,
+
+      "$activityId": {
+
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com' || auth.token.email === 'iigaccountant@gmail.com')",
+
+        "comments": {
+
+          ".read": true,
+
+          ".write": "auth != null",
+
+          "$commentId": {
+
+             ".write": "auth != null && (!data.exists() || data.child('email').val() === auth.token.email)"
+
+          }
+
+        }
+
+      }
+
+    },
+
+
+
+    "organization": {
+
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'accountant' || root.child('users').child(auth.uid).child('role').val() === 'cgt_user' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com' || auth.token.email === 'iigaccountant@gmail.com')",
+
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com')",
+
+      "centers": { ".indexOn": ["parentOffice"] },
+
+      "groups": { ".indexOn": ["parentCenter"] }
+
+    },
+
+
+
+    "requests": {
+
+      "onboarding": {
+
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'cgt_user' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com' || auth.token.email === 'iigaccountant@gmail.com')",
+
+        ".write": true,
+
+        ".indexOn": ["phone"]
+
+      },
+
+      "cgt_onboarding": {
+
+        ".read": "auth != null && (auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com')",
+
+        ".write": true,
+
+        ".indexOn": ["phone"]
+
+      }
+
+    },
+
+
+
+    "records": {
+
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'cgt_user' || root.child('users').child(auth.uid).child('role').val() === 'accountant' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com' || auth.token.email === 'iigaccountant@gmail.com')",
+
+      
+
+      "members": { 
+
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'cgt_user' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com')",
+
+        ".indexOn": ["groupId", "phone"]
+
+      },
+
+      
+
+      "audits": {
+
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'cgt_user' || auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com')",
+
+        ".indexOn": ["farmerPhone", "groupId"]
+
+      },
+
+      
+
+      "cgts": {
+
+        ".read": "auth != null",
+
+        ".write": "auth != null && (auth.token.email === 'iigsmartfarmersltd@gmail.com' || auth.token.email === 'delstarfordisaiah@gmail.com')"
+
+      }
+
+    }
+
+  }
+
+}

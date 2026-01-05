@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Command Matrix | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; overflow-x: hidden; }
+        .gradient-dark { background: linear-gradient(135deg, #022c22 0%, #064e3b 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        
+        .user-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-left: 6px solid #cbd5e1; position: relative; }
+        .user-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .staff-node { border-left-color: #6366f1; }
+        .member-node { border-left-color: #10b981; }
+        
+        .red-flag { border-left-color: #f97316 !important; background-color: #fff7ed !important; animation: pulse-border 2s infinite; }
+        @keyframes pulse-border { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        .sidebar-active { transform: translateX(0) !important; }
+        .kick-action { position: absolute; top: 1.25rem; right: 1.25rem; transition: all 0.2s; color: #94a3b8; z-index: 10; }
+        .kick-action:hover { color: #ef4444; transform: rotate(90deg) scale(1.3); }
+        .modal-overlay { background-color: rgba(2, 44, 34, 0.95); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <nav class="bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-[100] px-6 py-4 shadow-sm">
+        <div class="max-w-[1800px] mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <a href="admin.html" class="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-white hover:bg-emerald-600 transition shadow-lg"><i class="fas fa-chevron-left"></i></a>
+                <div>
+                    <h1 class="font-black text-sm uppercase tracking-tighter text-slate-900 leading-none">Command Matrix</h1>
+                    <p id="maint-status-text" class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Live Operation Mode</p>
+                </div>
+            </div>
+
+            <div class="flex-1 max-w-lg mx-8 hidden lg:block">
+                <input type="text" id="matrix-search" oninput="filterMatrix()" placeholder="SEARCH USER IDENTITY OR PHONE..." class="w-full px-6 py-2.5 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 font-bold text-[10px] uppercase tracking-widest">
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="repairDataKeys()" class="bg-amber-500 text-white px-4 py-2.5 rounded-xl text-[8px] font-black uppercase shadow-lg hover:bg-amber-600 transition"><i class="fas fa-tools mr-1"></i> Repair Keys</button>
+                <button onclick="exportMatrix()" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-[8px] font-black uppercase shadow-lg hover:bg-indigo-700 transition"><i class="fas fa-file-excel mr-1"></i> Export Matrix</button>
+                <div id="live-count" class="bg-slate-950 text-white px-4 py-2.5 rounded-xl text-[9px] font-black uppercase shadow-xl">Scanning Nodes...</div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-[1800px] mx-auto p-4 md:p-8 space-y-8">
+        <div class="bg-white p-10 rounded-[4rem] border border-slate-200 shadow-sm mt-8">
+            <div class="flex items-center justify-between mb-8 border-b pb-4">
+                <div>
+                    <h3 class="text-[11px] font-black uppercase text-slate-400 tracking-[0.4em]">Database Maintenance Utility</h3>
+                    <p class="text-[7px] font-bold text-slate-300 uppercase mt-1">Selective Module Purge Engine</p>
+                </div>
+                <span class="px-3 py-1 bg-red-50 text-red-600 rounded-lg text-[8px] font-black uppercase">Admin Authority Required</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <button onclick="openReauth('PURGE_SPECIFIC', 'records/members', 'ALL FARMER RECORDS')" class="p-6 bg-slate-50 border rounded-3xl text-left hover:border-red-500 transition-all group">
+                    <i class="fas fa-users-slash text-slate-300 group-hover:text-red-500 mb-4 transition-colors"></i>
+                    <p class="text-[9px] font-black uppercase text-slate-800">Farmer Nodes</p>
+                    <p class="text-[7px] font-bold text-slate-400 uppercase mt-1">Clear member registry</p>
+                </button>
+                <button onclick="openReauth('PURGE_SPECIFIC', 'organization', 'CENTERS & GROUPS')" class="p-6 bg-slate-50 border rounded-3xl text-left hover:border-red-500 transition-all group">
+                    <i class="fas fa-sitemap text-slate-300 group-hover:text-red-500 mb-4 transition-colors"></i>
+                    <p class="text-[9px] font-black uppercase text-slate-800">Infrastructure</p>
+                    <p class="text-[7px] font-bold text-slate-400 uppercase mt-1">Clear Hubs & Groups</p>
+                </button>
+                <button onclick="openReauth('PURGE_SPECIFIC', 'records/audits', 'AUDIT HISTORY')" class="p-6 bg-slate-50 border rounded-3xl text-left hover:border-red-500 transition-all group">
+                    <i class="fas fa-history text-slate-300 group-hover:text-red-500 mb-4 transition-colors"></i>
+                    <p class="text-[9px] font-black uppercase text-slate-800">Audit Ledger</p>
+                    <p class="text-[7px] font-bold text-slate-400 uppercase mt-1">Clear sync history</p>
+                </button>
+                <button onclick="openReauth('PURGE_SPECIFIC', 'activities', 'SOCIAL ACTIVITIES')" class="p-6 bg-slate-50 border rounded-3xl text-left hover:border-red-500 transition-all group">
+                    <i class="fas fa-comment-slash text-slate-300 group-hover:text-red-500 mb-4 transition-colors"></i>
+                    <p class="text-[9px] font-black uppercase text-slate-800">Activities</p>
+                    <p class="text-[7px] font-bold text-slate-400 uppercase mt-1">Clear posts & comments</p>
+                </button>
+                <button onclick="openReauth('PURGE_SPECIFIC', 'system_logs', 'INCIDENT LEDGER')" class="p-6 bg-slate-50 border rounded-3xl text-left hover:border-red-500 transition-all group">
+                    <i class="fas fa-file-invoice text-slate-300 group-hover:text-red-500 mb-4 transition-colors"></i>
+                    <p class="text-[9px] font-black uppercase text-slate-800">System Logs</p>
+                    <p class="text-[7px] font-bold text-slate-400 uppercase mt-1">Clear session history</p>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="gradient-dark p-8 md:p-12 rounded-[3.5rem] text-white hero-pattern shadow-2xl col-span-1 lg:col-span-2 flex flex-col justify-center relative overflow-hidden">
+                <h2 class="text-4xl font-black uppercase tracking-tighter leading-none mb-2">Network <br>Integrity</h2>
+                <p class="text-green-300 text-[9px] font-bold uppercase tracking-[0.3em] opacity-80">Full Operational Command Hub</p>
+                <div class="flex gap-4 mt-8 relative z-10">
+                    <button onclick="openReauth('PURGE_ALL')" class="px-8 py-4 bg-red-600 rounded-2xl font-black uppercase text-[10px] shadow-xl hover:bg-red-700 transition">Bulk System Purge</button>
+                    <button onclick="toggleMaintenance()" id="maint-btn" class="px-8 py-4 bg-white/10 border border-white/20 rounded-2xl font-black uppercase text-[10px] hover:bg-white/20 transition">Maint. Mode: OFF</button>
+                </div>
+            </div>
+            
+            <div class="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-sm flex flex-col justify-center text-center">
+                <p class="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Avg Latency</p>
+                <h3 id="latency-val" class="text-5xl font-black text-slate-900 tracking-tighter">-- ms</h3>
+                <p id="latency-status" class="text-[7px] font-black uppercase mt-3 text-green-500">System Healthy</p>
+            </div>
+
+            <div class="bg-white p-10 rounded-[3.5rem] border border-slate-200 shadow-sm flex flex-col justify-center text-center">
+                <p class="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-widest">Total Connectivity</p>
+                <h3 id="stat-ratio" class="text-5xl font-black text-slate-900 tracking-tighter">0%</h3>
+                <p class="text-[7px] font-black uppercase mt-3 text-slate-300">Participation Rate</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm flex justify-between items-center px-12">
+                <div><p class="text-[9px] font-black uppercase text-indigo-500 mb-1 tracking-widest">CGT Staff Count</p><h2 id="total-cgts" class="text-4xl font-black">0</h2></div>
+                <i class="fas fa-user-shield text-4xl text-slate-100"></i>
+            </div>
+            <div class="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-sm flex justify-between items-center px-12">
+                <div><p class="text-[9px] font-black uppercase text-emerald-500 mb-1 tracking-widest">Farmer Member Count</p><h2 id="total-members" class="text-4xl font-black">0</h2></div>
+                <i class="fas fa-users text-4xl text-slate-100"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-10 rounded-[4rem] border border-slate-200 shadow-sm">
+            <h3 class="text-[11px] font-black uppercase text-slate-400 tracking-[0.4em] mb-10 border-b pb-6">Real-time Integrated Matrix</h3>
+            <div id="matrix-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8"></div>
+        </div>
+    </main>
+
+    <div id="node-sidebar" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[200] shadow-2xl transform translate-x-full transition-transform duration-500 overflow-y-auto custom-scrollbar">
+        <div class="p-10 space-y-10">
+            <div class="flex justify-between items-center">
+                <button onclick="closeSidebar()" class="h-12 w-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 transition"><i class="fas fa-times"></i></button>
+                <h4 class="font-black uppercase text-[10px] tracking-[0.3em] text-slate-400">Forensic Node Inspector</h4>
+            </div>
+            <div id="sidebar-content" class="space-y-10"></div>
+        </div>
+    </div>
+
+    <div id="reauth-modal" class="fixed inset-0 z-[1000] hidden items-center justify-center p-4 modal-overlay">
+        <div class="bg-white w-full max-w-md rounded-[3.5rem] p-10 space-y-8 animate-in zoom-in-95">
+            <div class="text-center">
+                <div class="h-20 w-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i class="fas fa-user-lock text-3xl"></i></div>
+                <h3 class="text-2xl font-black uppercase tracking-tighter">Authorize Command</h3>
+                <p id="reauth-desc" class="text-[10px] text-slate-400 font-bold uppercase mt-2 px-6 leading-relaxed">Identity verification required for terminal access.</p>
+            </div>
+            <input type="password" id="admin-verify-pin" placeholder="SECURE ACCESS PIN" class="w-full p-6 bg-slate-50 border-2 rounded-3xl outline-none focus:border-red-500 font-black text-center tracking-[0.5em] text-sm shadow-inner transition-all">
+            <div class="flex gap-4">
+                <button onclick="closeReauth()" class="flex-1 py-5 bg-slate-100 rounded-3xl font-black uppercase text-[10px] text-slate-400">Abort</button>
+                <button id="confirm-action-btn" class="flex-1 py-5 bg-red-600 text-white rounded-3xl font-black uppercase text-[10px] shadow-xl">Execute</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        let db_members = {}, db_cgts = {}, db_statuses = {};
+        let currentActionPayload = { type: null, path: null, label: null, uid: null, email: null };
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const whitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+                if (whitelist.includes(user.email.toLowerCase())) {
+                    startMatrixStream();
+                    initializeAdminPresence(user.email);
+                } else { window.location.href = "admin.html"; }
+            } else { window.location.href = "index.html"; }
+        });
+
+        function startMatrixStream() {
+            database.ref('records/cgts').on('value', s => { 
+                db_cgts = s.val() || {}; 
+                document.getElementById('total-cgts').innerText = Object.keys(db_cgts).length;
+                renderMatrix(); 
+            });
+            database.ref('records/members').on('value', s => { 
+                db_members = s.val() || {}; 
+                document.getElementById('total-members').innerText = Object.keys(db_members).length;
+                renderMatrix(); 
+            });
+            database.ref('/status').on('value', s => { db_statuses = s.val() || {}; renderMatrix(); });
+            database.ref('system_settings/maintenance_mode').on('value', s => updateMaintUI(s.val()));
+            
+            measureLatency();
+            setInterval(measureLatency, 30000);
+        }
+
+        function renderMatrix() {
+            const list = document.getElementById('matrix-grid');
+            list.innerHTML = "";
+            let onlineCount = 0;
+
+            const allUsers = [
+                ...Object.entries(db_cgts).map(([uid, data]) => ({ uid, ...data, type: 'staff' })),
+                ...Object.entries(db_members).map(([uid, data]) => ({ uid, ...data, type: 'member' }))
+            ];
+
+            allUsers.forEach(user => {
+                const status = db_statuses[user.uid] || { state: 'offline' };
+                const isOnline = status.state === 'online';
+                if(isOnline) onlineCount++;
+
+                const sessionHours = (Date.now() - (status.last_changed || 0)) / 3600000;
+                const isAlert = isOnline && (sessionHours > 12 || status.latency > 1000);
+
+                list.innerHTML += `
+                    <div onclick="openInspector('${user.uid}')" class="user-card p-8 bg-slate-50 border rounded-[3.5rem] ${user.type === 'staff' ? 'staff-node' : 'member-node'} ${isAlert ? 'red-flag' : ''} flex flex-col justify-between" 
+                         data-search="${user.name?.toLowerCase()} ${user.phone}">
+                        
+                        <div onclick="event.stopPropagation(); openReauth('KICK', null, null, '${user.uid}', '${user.email || user.phone}')" class="kick-action">
+                            <i class="fas fa-times-circle text-2xl"></i>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-start mb-8 mr-10">
+                                <div class="h-16 w-16 rounded-[2rem] ${user.type === 'staff' ? 'bg-indigo-950' : 'bg-emerald-950'} flex items-center justify-center text-white text-xl font-black shadow-2xl">
+                                    ${user.name?.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="flex flex-col items-end">
+                                    <div class="h-4 w-4 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}"></div>
+                                    <p class="text-[8px] font-black uppercase text-slate-300 mt-2 tracking-widest">${status.state}</p>
+                                </div>
+                            </div>
+                            <p class="text-sm font-black uppercase text-slate-900 leading-none mb-2 truncate">${user.name}</p>
+                            <p class="text-[10px] font-bold text-slate-400 tracking-tighter">${user.phone}</p>
+                            <div class="mt-6 flex flex-wrap gap-2">
+                                <span class="px-2 py-1 bg-white rounded-lg text-[7px] font-black uppercase text-slate-400">IQ: ${status.latency || 0}ms</span>
+                                ${isAlert ? '<span class="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-[7px] font-black uppercase">Behavioral Alert</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="mt-8 py-2 bg-white/50 rounded-2xl border border-dashed border-slate-200 text-center">
+                             <p class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">${user.type}</p>
+                        </div>
+                    </div>`;
+            });
+            
+            document.getElementById('live-count').innerText = `${onlineCount} ACTIVE NODES`;
+            document.getElementById('stat-ratio').innerText = allUsers.length > 0 ? `${Math.round((onlineCount / allUsers.length) * 100)}%` : '0%';
+        }
+
+        function openInspector(uid) {
+            const user = { ...db_cgts[uid], ...db_members[uid] };
+            const status = db_statuses[uid] || {};
+            const sidebar = document.getElementById('sidebar-content');
+            
+            sidebar.innerHTML = `
+                <div class="p-10 bg-slate-950 rounded-[3rem] text-white shadow-2xl">
+                    <p class="text-[9px] font-black uppercase text-green-400 mb-2">Authenticated Identity</p>
+                    <h3 class="text-3xl font-black uppercase leading-none">${user.name}</h3>
+                    <p class="text-[9px] text-slate-400 mt-3 font-mono truncate">${uid}</p>
+                </div>
+                
+                <div class="p-8 bg-slate-50 rounded-[2.5rem] border shadow-inner">
+                    <p class="text-[9px] font-black uppercase text-slate-400 mb-6 tracking-widest border-b pb-3">Operational Meta</p>
+                    <div class="space-y-6">
+                        <div><p class="text-[8px] font-black text-slate-400 uppercase">Field Coordinates</p><p class="text-xs font-bold text-slate-800">${status.geo ? `${status.geo.lat.toFixed(6)}, ${status.geo.lng.toFixed(6)}` : 'Access Denied'}</p></div>
+                        <div><p class="text-[8px] font-black text-slate-400 uppercase">Last Forensic Sync</p><p class="text-xs font-bold text-slate-800">${status.last_changed ? new Date(status.last_changed).toLocaleString() : 'Never'}</p></div>
+                    </div>
+                </div>
+
+                <div class="p-8 bg-slate-50 rounded-[2.5rem] border shadow-inner">
+                    <p class="text-[9px] font-black uppercase text-slate-400 mb-6 tracking-widest border-b pb-3">Device Intelligence</p>
+                    <p class="text-[10px] font-bold text-slate-600 leading-relaxed">${status.device_info || 'Unknown Mobile Terminal'}</p>
+                </div>
+
+                ${status.geo ? `<a href="https://www.google.com/maps?q=${status.geo.lat},${status.geo.lng}&t=k" target="_blank" class="block w-full py-5 bg-indigo-600 text-white rounded-3xl text-center font-black uppercase text-[10px] shadow-xl"><i class="fas fa-map-marked-alt mr-2"></i> Locate Node in Satellite</a>` : ''}
+            `;
+            document.getElementById('node-sidebar').classList.add('sidebar-active');
+        }
+
+        // Unified Re-authentication Engine
+        function openReauth(type, path = null, label = null, uid = null, email = null) {
+            currentActionPayload = { type, path, label, uid, email };
+            const desc = document.getElementById('reauth-desc');
+            
+            if (type === 'PURGE_SPECIFIC') desc.innerText = `CRITICAL: PURGE ${label}?`;
+            else if (type === 'PURGE_ALL') desc.innerText = `EMERGENCY: PURGE ALL NON-ADMIN SESSIONS?`;
+            else if (type === 'KICK') desc.innerText = `TERMINATE SESSION FOR: ${email}`;
+
+            document.getElementById('reauth-modal').classList.replace('hidden', 'flex');
+        }
+
+        document.getElementById('confirm-action-btn').onclick = function() {
+            const pin = document.getElementById('admin-verify-pin').value;
+            const { type, path, label, uid, email } = currentActionPayload;
+
+            auth.signInWithEmailAndPassword(auth.currentUser.email, pin).then(async () => {
+                if (type === 'PURGE_SPECIFIC') {
+                    await database.ref(path).remove();
+                    logAdminAction(`PURGE_MODULE: ${label}`);
+                } else if (type === 'PURGE_ALL') {
+                    const snap = await database.ref('/status').once('value');
+                    const admins = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+                    snap.forEach(c => { if(!admins.includes(c.val().email)) database.ref('/status/' + c.key).update({ kick: true }); });
+                    logAdminAction(`GLOBAL_PURGE`);
+                } else if (type === 'KICK') {
+                    database.ref('/status/' + uid).update({ kick: true });
+                    logAdminAction(`KICK_USER: ${email}`);
+                }
+                
+                closeReauth();
+                alert("Strategic Command Executed.");
+            }).catch(() => alert("Verification Failed. Access Denied."));
+        };
+
+        function logAdminAction(action) {
+            database.ref('/system_logs').push({
+                email: auth.currentUser.email,
+                event: action,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        function initializeAdminPresence(email) {
+            const statusRef = database.ref('/status/' + auth.currentUser.uid);
+            const geoOptions = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
+
+            navigator.geolocation.getCurrentPosition(pos => {
+                const geo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                database.ref('.info/connected').on('value', snap => {
+                    if (!snap.val()) return;
+                    statusRef.onDisconnect().set({ state: 'offline', last_changed: firebase.database.ServerValue.TIMESTAMP, email, kick: false });
+                    statusRef.set({ state: 'online', last_changed: firebase.database.ServerValue.TIMESTAMP, email, kick: false, geo, device_info: navigator.userAgent });
+                });
+            }, () => console.log("Geo Restricted"), geoOptions);
+        }
+
+        function closeSidebar() { document.getElementById('node-sidebar').classList.remove('sidebar-active'); }
+        function closeReauth() { document.getElementById('reauth-modal').classList.replace('flex', 'hidden'); document.getElementById('admin-verify-pin').value = ""; }
+        
+        function measureLatency() {
+            const start = Date.now();
+            database.ref('.info/serverTimeOffset').once('value', () => {
+                const ms = Date.now() - start;
+                document.getElementById('latency-val').innerText = `${ms} ms`;
+                const s = document.getElementById('latency-status');
+                s.innerText = ms > 800 ? "Network Lagging" : "System Healthy";
+                s.className = `text-[7px] font-black uppercase mt-3 ${ms > 800 ? 'text-red-500 animate-pulse' : 'text-green-500'}`;
+            });
+        }
+
+        function filterMatrix() {
+            const term = document.getElementById('matrix-search').value.toLowerCase();
+            document.querySelectorAll('.user-card').forEach(card => card.style.display = card.dataset.search.includes(term) ? 'flex' : 'none');
+        }
+
+        async function repairDataKeys() {
+            if(!confirm("SYSTEM SCAN: Align legacy records with Firebase UIDs?")) return;
+            const users = await database.ref('users').once('value');
+            const members = await database.ref('records/members').once('value');
+            members.forEach(m => {
+                if(m.key.startsWith('-')) {
+                    users.forEach(u => {
+                        if(u.val().phone === m.val().phone) {
+                            database.ref(`records/members/${u.key}`).set(m.val());
+                            database.ref(`records/members/${m.key}`).remove();
+                        }
+                    });
+                }
+            });
+            alert("MATRIX OPTIMIZED.");
+        }
+    </script>
+</body>
+</html>

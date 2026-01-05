@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Terminal | IIG SMART FARMERS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        
+        /* Node Polish */
+        .center-node { border-left: 6px solid #10b981; transition: all 0.3s; }
+        .group-node { border-left: 4px solid #3b82f6; transition: all 0.3s; }
+        .member-node { border-left: 2px solid #cbd5e1; cursor: pointer; transition: all 0.2s; }
+        .member-node:hover { transform: translateX(5px); background-color: #f0fdf4; border-color: #10b981; }
+        .active-node { border-color: #10b981 !important; background-color: #f0fdf4 !important; box-shadow: inset 0 0 0 1px #10b981; }
+
+        .rotate-icon { transition: transform 0.3s ease; }
+        .open .rotate-icon { transform: rotate(180deg); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900">
+
+    <nav class="bg-white/90 backdrop-blur-xl border-b sticky top-0 z-[100] px-6 py-3">
+        <div class="max-w-[1600px] mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="h-11 w-11 bg-green-900 rounded-2xl flex items-center justify-center text-white font-black shadow-xl">IIG</div>
+                <div>
+                    <h1 class="font-black text-sm uppercase text-green-900">Strategic Terminal</h1>
+                    <p id="officer-display" class="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Global Financial Shield</p>
+                </div>
+            </div>
+            <div id="auth-status" class="hidden flex items-center space-x-3">
+                <button onclick="openOnboard()" class="bg-green-600 text-white text-[10px] font-black px-5 py-2.5 rounded-xl uppercase transition shadow-lg hover:bg-green-700">+ Node Onboard</button>
+                <button onclick="auth.signOut().then(()=>location.reload())" class="p-2.5 bg-slate-100 rounded-xl hover:text-red-600 transition"><i class="fas fa-power-off"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-[1600px] mx-auto p-4 md:p-8">
+        <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[3rem] shadow-2xl overflow-hidden mt-12 border">
+            <div class="gradient-dark p-12 text-white text-center">
+                <i class="fas fa-fingerprint text-4xl text-green-400 mb-4"></i>
+                <h2 class="text-2xl font-black uppercase">Master Access</h2>
+            </div>
+            <form id="login-form" class="p-10 space-y-4">
+                <input type="email" id="admin-email" placeholder="Registry Email" class="w-full p-4 rounded-2xl border bg-slate-50 font-bold text-sm outline-none focus:ring-2 focus:ring-green-500" required>
+                <input type="password" id="admin-password" placeholder="Secure PIN" class="w-full p-4 rounded-2xl border bg-slate-50 font-bold text-sm outline-none focus:ring-2 focus:ring-green-500" required>
+                <button type="submit" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl uppercase text-xs tracking-widest hover:bg-green-800 transition">Establish Connection</button>
+            </form>
+        </div>
+
+        <div id="dashboard-ui" class="hidden space-y-8 animate-in fade-in duration-700">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm"><p class="text-[10px] font-black text-slate-400 uppercase">Global Nodes</p><h3 id="stat-members" class="text-4xl font-black">0</h3></div>
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm"><p class="text-[10px] font-black text-blue-500 uppercase">MSA Total</p><h3 id="stat-total-msa" class="text-2xl font-black text-blue-600">KSh 0</h3></div>
+                <div class="bg-white p-6 rounded-[2rem] border shadow-sm"><p class="text-[10px] font-black text-indigo-500 uppercase">PSA Total</p><h3 id="stat-total-psa" class="text-2xl font-black text-indigo-600">KSh 0</h3></div>
+                <div class="gradient-dark p-6 rounded-[2rem] text-white shadow-2xl"><p class="text-[10px] font-black text-white/40 uppercase">GCA Value</p><h3 id="stat-total-gca" class="text-2xl font-black text-green-400">KSh 0</h3></div>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-white p-6 rounded-[2.5rem] border shadow-sm sticky top-28">
+                        <input type="text" id="master-search" oninput="filterHierarchy()" placeholder="Scan Identity..." class="w-full p-4 rounded-2xl border bg-slate-50 outline-none text-xs font-bold uppercase mb-6">
+                        <div id="hierarchy-tree" class="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2"></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8">
+                    <div class="bg-white rounded-[3.5rem] shadow-2xl border border-slate-100 min-h-[70vh] flex flex-col overflow-hidden">
+                        
+                        <div id="sync-placeholder" class="flex-1 flex flex-col items-center justify-center text-center p-12">
+                            <div class="h-24 w-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border-2 border-dashed border-slate-200">
+                                <i id="summary-icon" class="fas fa-microchip text-4xl text-slate-200"></i>
+                            </div>
+                            <h4 id="summary-title" class="text-xs font-black uppercase text-slate-400 tracking-[0.4em]">Forensic Offline</h4>
+                            <p id="summary-desc" class="text-[10px] text-slate-300 mt-2 max-w-xs uppercase font-bold leading-relaxed">Select a Hub or Group from the directory to analyze aggregate performance.</p>
+                            <div id="summary-stats" class="mt-8 grid grid-cols-2 gap-6 hidden w-full max-w-sm">
+                                </div>
+                        </div>
+
+                        <div id="sync-interface" class="hidden flex flex-col h-full animate-in slide-in-from-bottom-4 duration-500">
+                            <div class="gradient-dark p-10 md:p-14 text-white hero-pattern">
+                                <div id="breadcrumb" class="text-[8px] font-black uppercase text-green-400/60 tracking-[0.3em] mb-4">---</div>
+                                <h2 id="active-name" class="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-4">---</h2>
+                                <p id="active-phone" class="text-[11px] font-mono text-green-400 bg-black/20 px-3 py-1 rounded-md inline-block uppercase font-bold"></p>
+                            </div>
+
+                            <div class="p-8 md:p-14 flex-1">
+                                <form id="audit-form" class="space-y-10">
+                                    <div class="grid md:grid-cols-2 gap-10">
+                                        <div class="space-y-4">
+                                            <h4 class="text-[10px] font-black uppercase text-indigo-500 tracking-widest">Personal Assets (PSA)</h4>
+                                            <div class="bg-slate-50 p-8 rounded-[2.5rem] space-y-4 border shadow-inner">
+                                                <input type="number" id="inp-psa" placeholder="Loan Repayment" class="w-full p-4 rounded-xl border font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                                                <input type="number" id="inp-afs" placeholder="Social Fund" class="w-full p-4 rounded-xl border font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                                                <input type="number" id="inp-fis" placeholder="Farm Inputs" class="w-full p-4 rounded-xl border font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-4">
+                                            <h4 class="text-[10px] font-black uppercase text-blue-500 tracking-widest">Regulated Assets (MSA)</h4>
+                                            <div class="bg-slate-50 p-8 rounded-[2.5rem] space-y-4 border shadow-inner">
+                                                <input type="number" id="inp-msa" placeholder="Member Savings" class="w-full p-4 rounded-xl border font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                                <input type="number" id="inp-gff" placeholder="Fines Paid" class="w-full p-4 rounded-xl border font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                                <input type="number" id="inp-gmf" placeholder="Mwalimu Fund" class="w-full p-4 rounded-xl border font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" id="sync-btn" class="w-full bg-slate-900 text-white font-black py-8 rounded-[2.5rem] shadow-2xl hover:bg-green-700 transition uppercase tracking-[0.3em] text-xs">Execute Strategic Sync</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="onboard-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[500] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-[3.5rem] p-10 md:p-14 shadow-2xl space-y-8">
+            <h3 class="text-2xl font-black uppercase text-center">Node Onboarding</h3>
+            <form id="onboard-form" class="space-y-4">
+                <input type="text" id="on-name" placeholder="Full Legal Identity" class="w-full p-5 rounded-2xl border bg-slate-50 font-bold text-sm outline-none focus:ring-2 focus:ring-green-500" required>
+                <input type="text" id="on-phone" placeholder="Mobile Number" class="w-full p-5 rounded-2xl border bg-slate-50 font-bold text-sm outline-none focus:ring-2 focus:ring-green-500" required>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="on-center" onchange="filterOnboardGroups()" class="w-full p-5 rounded-2xl border bg-slate-50 font-bold text-xs uppercase" required></select>
+                    <select id="on-group" class="w-full p-5 rounded-2xl border bg-slate-50 font-bold text-xs uppercase" required></select>
+                </div>
+                <button type="submit" class="w-full py-5 bg-green-900 text-white rounded-2xl font-black uppercase text-[10px] hover:bg-green-700 transition shadow-xl">Integrate Node</button>
+            </form>
+            <button onclick="document.getElementById('onboard-modal').classList.add('hidden')" class="w-full text-[9px] font-black uppercase text-slate-300 hover:text-red-500">Abort Registry</button>
+        </div>
+    </div>
+
+    <script>
+    // --- DB CONFIG ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+        authDomain: "help-me-up-70fcc.firebaseapp.com",
+        databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+        projectId: "help-me-up-70fcc",
+        storageBucket: "help-me-up-70fcc.firebasestorage.app",
+        messagingSenderId: "593893312398",
+        appId: "1:593893312398:web:a982fca857289fc2f206df"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth(), database = firebase.database();
+
+    // Session State
+    let db_centers = {}, db_groups = {}, db_members = {};
+    let activeMemberId = null;
+
+    // --- AUTH HANDSHAKE ---
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            document.getElementById('login-ui').classList.add('hidden');
+            document.getElementById('dashboard-ui').classList.remove('hidden');
+            document.getElementById('auth-status').classList.remove('hidden');
+            document.getElementById('officer-display').innerText = `OFFICER: ${user.email.toUpperCase()}`;
+            startTerminalSync();
+        }
+    });
+
+    document.getElementById('login-form').onsubmit = (e) => {
+        e.preventDefault();
+        auth.signInWithEmailAndPassword(document.getElementById('admin-email').value, document.getElementById('admin-password').value);
+    };
+
+    function startTerminalSync() {
+        database.ref('organization/centers').on('value', s => { db_centers = s.val() || {}; renderTree(); updateOnboardDropdowns(); });
+        database.ref('organization/groups').on('value', s => { db_groups = s.val() || {}; renderTree(); });
+        database.ref('records/members').on('value', s => { db_members = s.val() || {}; renderTree(); });
+    }
+
+    // --- DIRECTORY ENGINE (DRILL DOWN) ---
+    function renderTree() {
+        const tree = document.getElementById('hierarchy-tree');
+        tree.innerHTML = "";
+        let sums = { gca: 0, msa: 0, psa: 0, count: 0 };
+
+        Object.entries(db_centers).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([cId, center]) => {
+            const groups = Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cId);
+            let cTotal = 0;
+
+            const groupHtml = groups.map(([gId, group]) => {
+                const members = Object.entries(db_members).filter(([_, m]) => m.groupId === gId);
+                let gTotal = 0;
+
+                const membersHtml = members.map(([mId, m]) => {
+                    sums.count++;
+                    const f = m.financials || {};
+                    const mSum = (parseFloat(f.msa)||0) + (parseFloat(f.gff)||0);
+                    const pSum = (parseFloat(f.psa)||0) + (parseFloat(f.afs)||0);
+                    const nodeTotal = mSum + pSum;
+                    sums.msa += mSum; sums.psa += pSum; sums.gca += nodeTotal; gTotal += nodeTotal;
+
+                    return `
+                        <div id="node-${mId}" onclick="selectMember('${mId}', '${gId}', '${cId}')" 
+                             class="member-node p-4 border rounded-2xl flex justify-between items-center mb-2 bg-white ${activeMemberId === mId ? 'active-node' : ''}" 
+                             data-search="${m.name.toLowerCase()} ${m.phone}">
+                            <div>
+                                <p class="font-black text-[10px] uppercase text-slate-700 leading-none">${m.name}</p>
+                                <p class="text-[8px] font-mono text-slate-400 mt-1">${m.phone}</p>
+                            </div>
+                            <p class="text-[10px] font-black text-slate-900">KSh ${nodeTotal.toLocaleString()}</p>
+                        </div>`;
+                }).join('');
+
+                cTotal += gTotal;
+                return `
+                    <div id="grp-wrap-${gId}" class="group-node mb-4 pl-4">
+                        <div class="flex justify-between items-center cursor-pointer p-2 hover:bg-blue-50 rounded-xl transition" onclick="toggleSelection('g-${gId}', 'group', '${gId}')">
+                            <span class="text-[10px] font-black uppercase text-blue-600 flex items-center gap-2">
+                                <i class="fas fa-chevron-down rotate-icon text-[8px]"></i> ${group.name}
+                            </span>
+                            <span class="text-[9px] font-bold text-slate-400">KSh ${gTotal.toLocaleString()}</span>
+                        </div>
+                        <div id="g-${gId}" class="hidden mt-3 space-y-1">${membersHtml || '<p class="text-[8px] italic text-slate-300">Empty</p>'}</div>
+                    </div>`;
+            }).join('');
+
+            tree.innerHTML += `
+                <div id="cnt-wrap-${cId}" class="center-node p-5 border rounded-3xl mb-3 shadow-sm bg-white">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleSelection('c-${cId}', 'center', '${cId}')">
+                        <h3 class="font-black text-[11px] uppercase text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-chevron-down rotate-icon text-[9px]"></i> ${center.name} HUB
+                        </h3>
+                        <p class="text-[10px] font-black text-green-700">KSh ${cTotal.toLocaleString()}</p>
+                    </div>
+                    <div id="c-${cId}" class="hidden mt-6">${groupHtml}</div>
+                </div>`;
+        });
+
+        // Global UI Update
+        document.getElementById('stat-members').innerText = sums.count;
+        document.getElementById('stat-total-msa').innerText = `KSh ${sums.msa.toLocaleString()}`;
+        document.getElementById('stat-total-psa').innerText = `KSh ${sums.psa.toLocaleString()}`;
+        document.getElementById('stat-total-gca').innerText = `KSh ${sums.gca.toLocaleString()}`;
+    }
+
+    // --- INTERACTION LOGIC ---
+    function toggleSelection(id, type, dbId) {
+        const el = document.getElementById(id);
+        const wrapper = document.getElementById(`${type === 'center' ? 'cnt' : 'grp'}-wrap-${dbId}`);
+        
+        el.classList.toggle('hidden');
+        wrapper.classList.toggle('open');
+
+        // Show context summary in right panel
+        if (!el.classList.contains('hidden')) {
+            showSummary(type, dbId);
+        }
+    }
+
+    function showSummary(type, id) {
+        const place = document.getElementById('sync-placeholder'), sync = document.getElementById('sync-interface');
+        sync.classList.add('hidden'); 
+        place.classList.remove('hidden');
+
+        if (type === 'center') {
+            const c = db_centers[id];
+            document.getElementById('summary-title').innerText = `${c.name} Hub Analytics`;
+            document.getElementById('summary-desc').innerText = "Analyzing integrated financial performance across all subgroups in this hub.";
+            document.getElementById('summary-icon').className = "fas fa-city text-4xl text-green-500";
+        } else {
+            const g = db_groups[id];
+            document.getElementById('summary-title').innerText = `${g.name} Group Profile`;
+            document.getElementById('summary-desc').innerText = "Direct member oversight and portfolio sync required for this specific node.";
+            document.getElementById('summary-icon').className = "fas fa-users-viewfinder text-4xl text-blue-500";
+        }
+    }
+
+    function selectMember(mId, gId, cId) {
+        activeMemberId = mId;
+        const m = db_members[mId], c = db_centers[cId], g = db_groups[gId];
+
+        document.getElementById('sync-placeholder').classList.add('hidden');
+        document.getElementById('sync-interface').classList.remove('hidden');
+
+        document.getElementById('breadcrumb').innerText = `${c.name} HUB > ${g.name} > MEMBER NODE`;
+        document.getElementById('active-name').innerText = m.name;
+        document.getElementById('active-phone').innerText = `REGISTRY ID: ${m.phone}`;
+
+        const f = m.financials || {};
+        ['psa', 'afs', 'fis', 'msa', 'gff', 'gmf'].forEach(k => {
+            const input = document.getElementById(`inp-${k}`);
+            if(input) input.value = f[k] || 0;
+        });
+
+        renderTree();
+    }
+
+    document.getElementById('audit-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('sync-btn');
+        btn.innerText = "ENCRYPTING & SYNCING...";
+        
+        const update = {
+            psa: parseFloat(document.getElementById('inp-psa').value || 0),
+            afs: parseFloat(document.getElementById('inp-afs').value || 0),
+            fis: parseFloat(document.getElementById('inp-fis').value || 0),
+            msa: parseFloat(document.getElementById('inp-msa').value || 0),
+            gff: parseFloat(document.getElementById('inp-gff').value || 0),
+            gmf: parseFloat(document.getElementById('inp-gmf').value || 0),
+            lastAuditTime: Date.now()
+        };
+
+        await database.ref(`records/members/${activeMemberId}/financials`).set(update);
+        alert("Strategic Sync Successful.");
+        btn.innerText = "Execute Strategic Sync";
+    };
+
+    // --- HELPERS ---
+    function openOnboard() { document.getElementById('onboard-modal').classList.remove('hidden'); }
+    function filterHierarchy() {
+        const term = document.getElementById('master-search').value.toLowerCase();
+        document.querySelectorAll('.member-node').forEach(n => {
+            n.style.display = n.dataset.search.includes(term) ? "flex" : "none";
+        });
+    }
+    function updateOnboardDropdowns() {
+        let opts = '<option value="">Target Hub</option>';
+        Object.entries(db_centers).forEach(([id, c]) => opts += `<option value="${id}">${c.name}</option>`);
+        document.getElementById('on-center').innerHTML = opts;
+    }
+    function filterOnboardGroups() {
+        const cid = document.getElementById('on-center').value;
+        let opts = '<option value="">Target Group</option>';
+        Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cid).forEach(([id, g]) => opts += `<option value="${id}">${g.name}</option>`);
+        document.getElementById('on-group').innerHTML = opts;
+    }
+    </script>
+</body>
+</html>

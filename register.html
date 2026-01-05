@@ -265,6 +265,29 @@
                 btn.innerText = "Retry Submission";
             }
         };
+        // Add to auth.onAuthStateChanged success block
+database.ref('system_settings/maintenance_mode').on('value', snap => {
+    if (snap.val() === true && !['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'].includes(auth.currentUser.email)) {
+        document.body.innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white p-10 text-center">
+                <i class="fas fa-tools text-6xl text-green-400 mb-6 animate-bounce"></i>
+                <h1 class="text-3xl font-black uppercase tracking-widest">System Maintenance</h1>
+                <p class="mt-4 text-slate-400 text-xs uppercase tracking-widest leading-loose">Access to the Strategic Terminal is currently restricted.<br>Synchronizing global ledger security. Please stand by.</p>
+            </div>`;
+    }
+});
+        function initializePresence(email) {
+    const statusRef = database.ref('/status/' + auth.currentUser.uid);
+    database.ref('.info/connected').on('value', snap => {
+        if (snap.val() === false) return;
+        // Sets status to online when connected
+        statusRef.onDisconnect().set({ state: 'offline', last_changed: firebase.database.ServerValue.TIMESTAMP, email: email, kick: false })
+        .then(() => {
+            statusRef.set({ state: 'online', last_changed: firebase.database.ServerValue.TIMESTAMP, email: email, kick: false });
+        });
+    });
+    
+}
     </script>
 </body>
 </html>

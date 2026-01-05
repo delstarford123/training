@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    background-color: #f1f5f9; 
+    overflow-x: hidden; 
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Financial Pillar Color System */
+.border-msa { border-left: 8px solid #10b981; } .text-msa { color: #10b981; }
+.border-gff { border-left: 8px solid #ef4444; } .text-gff { color: #ef4444; }
+.border-gmf { border-left: 8px solid #0ea5e9; } .text-gmf { color: #0ea5e9; }
+.border-gsf { border-left: 8px solid #3b82f6; } .text-gsf { color: #3b82f6; }
+.border-psa { border-left: 8px solid #8b5cf6; } .text-psa { color: #8b5cf6; }
+.border-fis { border-left: 8px solid #f59e0b; } .text-fis { color: #f59e0b; }
+.border-gca { border-left: 8px solid #064e3b; } .text-gca { color: #064e3b; }
+.border-afs { border-left: 8px solid #d946ef; } .text-afs { color: #d946ef; }
+
+.member-card { 
+    background: white; 
+    border-radius: 3.5rem; 
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); 
+}
+
+#sidebar-panel { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+#sidebar-panel.hidden-mobile { transform: translateX(-100%); }
+
+@media print {
+    .no-print, nav, aside, button, #sidebar-overlay { display: none !important; }
+    body, html { background: white !important; height: auto !important; overflow: visible !important; }
+    #main-content { padding: 0 !important; width: 100% !important; position: static !important; }
+    .print-letterhead { display: block !important; }
+    .member-card { border: 2px solid #f1f5f9 !important; box-shadow: none !important; break-inside: avoid; }
+    input { border: none !important; font-weight: 900 !important; }
+}
+
+.animate-fade { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

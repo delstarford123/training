@@ -38,42 +38,106 @@
             </div>
         </form>
     </div>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+        authDomain: "help-me-up-70fcc.firebaseapp.com",
+        databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+        projectId: "help-me-up-70fcc",
+        storageBucket: "help-me-up-70fcc.firebasestorage.app",
+        messagingSenderId: "593893312398",
+        appId: "1:593893312398:web:a982fca857289fc2f206df"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
-            authDomain: "help-me-up-70fcc.firebaseapp.com",
-            databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
-            projectId: "help-me-up-70fcc",
-            storageBucket: "help-me-up-70fcc.firebasestorage.app",
-            messagingSenderId: "593893312398",
-            appId: "1:593893312398:web:a982fca857289fc2f206df"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+    document.getElementById('login-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('login-btn');
+        const email = document.getElementById('login-email').value.toLowerCase().trim();
+        const password = document.getElementById('login-password').value;
 
-        document.getElementById('login-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('login-btn');
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
+        btn.innerText = "AUTHENTICATING...";
+        btn.disabled = true;
 
-            btn.innerText = "VERIFYING...";
-            btn.disabled = true;
+        try {
+            // 1. Sign in with Firebase Auth
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            const user = userCredential.user;
 
-            try {
-                // Log the user in
-                await auth.signInWithEmailAndPassword(email, password);
-                
-                // Redirect everyone to index.html
-                // The auth.js guard on index.html will handle role-checks from here.
-                window.location.href = "index.html"; 
-            } catch (error) {
-                alert("Login Failed: " + error.message);
-                btn.innerText = "SYNCHRONIZE ACCESS";
-                btn.disabled = false;
+            // 2. Define Master Whitelists
+            const admins = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+            const accountant = 'iigaccountant@gmail.com';
+
+            // 3. Routing Logic
+            if (admins.includes(email)) {
+                window.location.href = "admin.html";
+                return;
             }
-        };
-    </script>
+
+            if (email === accountant) {
+                window.location.href = "accountant.html";
+                return;
+            }
+
+            // 4. Check if Approved CGT in Database
+            const cgtSnapshot = await database.ref('records/cgts').get();
+            let isApprovedCGT = false;
+
+            if (cgtSnapshot.exists()) {
+                const cgts = cgtSnapshot.val();
+                // Check if this email exists in the approved CGT records
+                isApprovedCGT = Object.values(cgts).some(cgt => 
+                    cgt.email && cgt.email.toLowerCase() === email
+                );
+            }
+
+            if (isApprovedCGT) {
+                window.location.href = "cgt access.html";
+            } else {
+                // If not Admin, Accountant, or Approved CGT, send to standard index
+                window.location.href = "index.html";
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Login Failed: " + error.message);
+            btn.innerText = "SYNCHRONIZE ACCESS";
+            btn.disabled = false;
+        }
+        // --- ADD THIS INSIDE YOUR LOGIN SUCCESS BLOCK ---
+const logEntry = {
+    email: auth.currentUser.email,
+    event: 'login', // Change to 'logout' for your logout button
+    timestamp: firebase.database.ServerValue.TIMESTAMP,
+    uid: auth.currentUser.uid
+};
+database.ref('/system_logs').push(logEntry);
+    };
+
+    function initializePresence(email) {
+    const statusRef = database.ref('/status/' + auth.currentUser.uid);
+    database.ref('.info/connected').on('value', snap => {
+        if (snap.val() === false) return;
+        // Sets status to online when connected
+        statusRef.onDisconnect().set({ state: 'offline', last_changed: firebase.database.ServerValue.TIMESTAMP, email: email, kick: false })
+        .then(() => {
+            statusRef.set({ state: 'online', last_changed: firebase.database.ServerValue.TIMESTAMP, email: email, kick: false });
+        });
+    });
+    // Add to auth.onAuthStateChanged success block
+database.ref('system_settings/maintenance_mode').on('value', snap => {
+    if (snap.val() === true && !['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'].includes(auth.currentUser.email)) {
+        document.body.innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white p-10 text-center">
+                <i class="fas fa-tools text-6xl text-green-400 mb-6 animate-bounce"></i>
+                <h1 class="text-3xl font-black uppercase tracking-widest">System Maintenance</h1>
+                <p class="mt-4 text-slate-400 text-xs uppercase tracking-widest leading-loose">Access to the Strategic Terminal is currently restricted.<br>Synchronizing global ledger security. Please stand by.</p>
+            </div>`;
+    }
+});
+}
+</script>
 </body>
 </html>

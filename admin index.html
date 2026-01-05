@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Master Terminal | IIG SMART FARMERS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="text-slate-900 flex flex-col h-screen bg-[#f1f5f9]">
+
+    <div class="hidden print-letterhead w-full text-center p-8 border-b-4 border-emerald-900 mb-10">
+        <h1 class="text-4xl font-black text-emerald-900 uppercase">IIG SMART FARMERS LTD</h1>
+        <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500 mt-2">Official Financial Audit & Credit Registry</p>
+    </div>
+
+    <nav class="h-[75px] bg-white/90 backdrop-blur-md border-b flex justify-between items-center px-8 z-[1000] no-print sticky top-0">
+        <div class="flex items-center space-x-3">
+            <button onclick="ui.toggleSidebar()" class="lg:hidden p-2 text-slate-500"><i class="fas fa-bars"></i></button>
+            <div class="h-10 w-10 bg-emerald-900 rounded-xl flex items-center justify-center text-white font-black">IIG</div>
+            <div class="hidden sm:block">
+                <h1 class="font-extrabold text-[10px] uppercase tracking-widest text-emerald-900">Strategic Terminal</h1>
+                <p id="officer-status" class="text-[8px] font-bold text-slate-400 uppercase mt-1">Sync: Authenticating...</p>
+            </div>
+        </div>
+        <div id="nav-actions" class="hidden flex items-center space-x-2">
+            <button onclick="window.print()" class="p-2.5 bg-slate-50 rounded-xl border text-emerald-600"><i class="fas fa-print"></i></button>
+            <button onclick="authManager.logout()" class="p-2.5 bg-slate-50 rounded-xl border text-red-500"><i class="fas fa-power-off"></i></button>
+        </div>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-[1040] hidden lg:hidden" onclick="ui.toggleSidebar()"></div>
+
+        <aside id="sidebar-panel" class="absolute lg:static inset-y-0 left-0 w-[85%] lg:w-[420px] bg-white border-r z-[1050] flex flex-col no-print hidden-mobile lg:transform-none">
+            <div class="p-6 border-b space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-4 bg-slate-50 rounded-3xl border text-center">
+                        <p class="text-[8px] font-black text-slate-400 uppercase">Global Nodes</p>
+                        <h3 id="stat-members" class="text-2xl font-black text-slate-800">0</h3>
+                    </div>
+                    <div class="p-4 bg-emerald-900 rounded-3xl text-white text-center">
+                        <p class="text-[8px] font-black text-emerald-300 uppercase">Total Ward Sum</p>
+                        <h3 id="stat-total-gca" class="text-[9px] font-black">KSh 0</h3>
+                    </div>
+                </div>
+                <input type="text" id="master-search" oninput="ui.filterHierarchy()" placeholder="Scan Phone ID..." class="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-[10px] font-bold uppercase outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div id="hierarchy-tree" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar"></div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar scroll-smooth">
+            <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[3rem] shadow-2xl border p-12 text-center mt-10 no-print">
+                <i class="fas fa-shield-check text-6xl text-emerald-600 mb-8"></i>
+                <h2 class="text-2xl font-black uppercase text-slate-800 tracking-tighter">Officer Access</h2>
+                <form id="login-form" class="mt-8 space-y-4">
+                    <input type="email" id="admin-email" placeholder="Officer ID" class="w-full p-4 rounded-xl border font-bold" required>
+                    <input type="password" id="admin-password" placeholder="Terminal PIN" class="w-full p-4 rounded-xl border font-bold" required>
+                    <button type="submit" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl uppercase text-[10px] tracking-widest shadow-xl">Establish Terminal Link</button>
+                </form>
+            </div>
+
+            <div id="dashboard-content" class="hidden">
+                 <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6 mb-10 no-print">
+                    <div class="bg-white rounded-[3rem] border p-8">
+                        <h3 class="text-[11px] font-black uppercase tracking-widest text-emerald-700 mb-6">Pending Registrations</h3>
+                        <div id="pending-members" class="space-y-3"></div>
+                    </div>
+                    <div class="bg-white rounded-[3rem] border p-8">
+                        <h3 class="text-[11px] font-black uppercase tracking-widest text-indigo-700 mb-6">Pending CGT Applications</h3>
+                        <div id="pending-cgt" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <div id="member-dossier" class="hidden max-w-5xl mx-auto space-y-10">
+                    </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/audits.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/analytics.js"></script>
+</body>
+</html>

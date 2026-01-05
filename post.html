@@ -13,150 +13,119 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
         .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
-        
-        .float-greeting { animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        
-        .interaction-icon { cursor: pointer; transition: all 0.2s ease; }
-        .interaction-icon:hover { transform: scale(1.1); }
-        .liked { color: #ef4444 !important; font-weight: 900; }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        .post-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .post-card:hover { transform: translateY(-5px); }
     </style>
 </head>
 <body class="min-h-screen text-slate-900">
 
-    <nav class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[100] px-6 py-4">
+    <nav class="bg-white/95 backdrop-blur-md border-b sticky top-0 z-[100] px-6 py-4 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-4">
                 <div class="h-10 w-10 bg-green-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
                 <div>
-                    <h1 class="font-black text-xs uppercase tracking-widest text-green-900 leading-none">Post Intelligence</h1>
-                    <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Broadcast Terminal Node</p>
+                    <h1 class="font-black text-xs uppercase tracking-widest text-green-900 leading-none">Broadcast Terminal</h1>
+                    <p class="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Strategic Intelligence Node</p>
                 </div>
             </div>
             
             <div id="auth-status" class="hidden flex items-center space-x-4">
-                <a href="index.html" class="text-[10px] font-black text-slate-400 hover:text-green-700 uppercase tracking-widest transition">
-                    <i class="fas fa-arrow-left mr-2"></i> Return to Hub
+                <a href="admin.html" class="text-[10px] font-black text-slate-400 hover:text-green-700 uppercase tracking-widest transition">
+                    <i class="fas fa-th-large mr-2"></i> Master Console
                 </a>
                 <span id="user-email-nav" class="text-[9px] font-black uppercase text-green-700 bg-green-50 px-3 py-1 rounded-full border border-green-100"></span>
+                <button onclick="auth.signOut()" class="text-[10px] font-black text-red-500 uppercase">Logout</button>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto py-10 px-4 grid lg:grid-cols-2 gap-10">
-        
-        <div id="post-ui" class="hidden space-y-8">
-            <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
-                <div class="gradient-dark p-10 text-white relative hero-pattern">
-                    <h2 class="text-2xl font-black uppercase tracking-tighter">Strategic Broadcast</h2>
-                    <p class="text-green-300 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Configure Data for Network Deployment</p>
-                </div>
-
-                <form id="activity-form" class="p-8 space-y-6">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Broadcast Category</label>
-                        <div class="flex flex-wrap gap-2">
-                            <label class="cursor-pointer">
-                                <input type="radio" name="category" value="Announcement" checked class="hidden peer">
-                                <span class="px-4 py-2 rounded-xl border border-slate-200 text-[9px] font-black uppercase peer-checked:bg-green-600 peer-checked:text-white transition block">📢 Announcement</span>
-                            </label>
-                            <label class="cursor-pointer">
-                                <input type="radio" name="category" value="Financial" class="hidden peer">
-                                <span class="px-4 py-2 rounded-xl border border-slate-200 text-[9px] font-black uppercase peer-checked:bg-blue-600 peer-checked:text-white transition block">💰 Financial Hub</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Update Headline</label>
-                        <input type="text" id="event-title" required oninput="updatePreview()" class="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 transition font-bold" placeholder="Headline...">
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Message Body</label>
-                        <textarea id="event-desc" rows="5" required oninput="updatePreview()" class="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 transition text-sm leading-relaxed" placeholder="Detailed message for farmers..."></textarea>
-                    </div>
-
-                    <div class="p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 group hover:border-green-500 transition-all text-center relative">
-                        <i class="fas fa-camera text-slate-300 text-2xl mb-2 group-hover:text-green-500 transition"></i>
-                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Replace Default Logo (Optional)</label>
-                        <input type="file" id="event-file" accept="image/*" onchange="handleFile(event)" class="w-full text-[10px] text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[9px] file:font-black file:bg-slate-900 file:text-white cursor-pointer">
-                    </div>
-
-                    <button type="submit" id="submit-btn" class="w-full bg-slate-900 text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-green-700 transition transform active:scale-95 uppercase tracking-[0.3em] text-xs">
-                        Publish to IIG SMART FARMERS NETWORK
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="space-y-6">
-            <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] ml-6"> Live Preview</h3>
+    <main class="max-w-7xl mx-auto py-10 px-4">
+        <div class="grid lg:grid-cols-12 gap-10">
             
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden sticky top-28">
-                <div class="p-6 flex items-center space-x-3 border-b border-slate-50">
-                    <div class="h-10 w-10 bg-green-900 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md">IIG</div>
-                    <div>
-                        <p class="text-xs font-black uppercase tracking-tight">IIG Smart Farmers</p>
-                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Just now • <span id="prev-cat" class="text-green-600">Announcement</span></p>
+            <div id="post-ui" class="hidden lg:col-span-5 space-y-8">
+                <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-200 overflow-hidden">
+                    <div class="gradient-dark p-10 text-white relative hero-pattern">
+                        <h2 class="text-2xl font-black uppercase tracking-tighter">Configure Intel</h2>
+                        <p class="text-green-300 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Deploy Strategic Data to Network</p>
+                    </div>
+
+                    <form id="activity-form" class="p-8 space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Category</label>
+                            <div class="flex flex-wrap gap-2">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="category" value="Announcement" checked class="hidden peer">
+                                    <span class="px-4 py-2 rounded-xl border text-[9px] font-black uppercase peer-checked:bg-green-600 peer-checked:text-white transition block">📢 Announcement</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="category" value="Event" class="hidden peer">
+                                    <span class="px-4 py-2 rounded-xl border text-[9px] font-black uppercase peer-checked:bg-amber-600 peer-checked:text-white transition block">🗓️ Event</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="category" value="Financial" class="hidden peer">
+                                    <span class="px-4 py-2 rounded-xl border text-[9px] font-black uppercase peer-checked:bg-blue-600 peer-checked:text-white transition block">💰 Financial</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Headline</label>
+                            <input type="text" id="event-title" required oninput="updatePreview()" class="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 transition font-bold" placeholder="Message Title...">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1">Message Body</label>
+                            <textarea id="event-desc" rows="5" required oninput="updatePreview()" class="w-full px-6 py-4 rounded-2xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 transition text-sm leading-relaxed" placeholder="Write message for the farmer network..."></textarea>
+                        </div>
+
+                        <div class="p-6 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 group hover:border-green-500 transition-all text-center">
+                            <i class="fas fa-camera text-slate-300 text-2xl mb-2 group-hover:text-green-500 transition"></i>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Attach Media (Optional)</label>
+                            <input type="file" id="event-file" accept="image/*" onchange="handleFile(event)" class="w-full text-[9px] text-slate-500 cursor-pointer">
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="w-full bg-slate-900 text-white font-black py-6 rounded-[2rem] shadow-xl hover:bg-green-700 transition uppercase tracking-[0.3em] text-xs">
+                            Transmit Intelligence
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-10">
+                
+                <div class="space-y-4">
+                    <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] ml-6">Deployment Preview</h3>
+                    <div id="preview-container" class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden post-card">
+                        <div class="p-6 flex items-center space-x-3 border-b">
+                            <div class="h-10 w-10 bg-green-900 rounded-full flex items-center justify-center text-white text-xs font-bold">IIG</div>
+                            <div>
+                                <p class="text-xs font-black uppercase">IIG Smart Farmers</p>
+                                <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Draft Node • <span id="prev-cat" class="text-green-600">Announcement</span></p>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-4">
+                            <h2 id="prev-title" class="text-xl font-black text-slate-800 leading-tight">Intel Headline Preview</h2>
+                            <p id="prev-desc" class="text-[13px] text-slate-600 leading-relaxed italic">Intelligence payload description will appear here...</p>
+                        </div>
+                        <div class="px-8 pb-8">
+                            <img id="prev-img" src="IIG LOGO.jpeg" class="w-full h-64 object-cover rounded-[2rem] shadow-lg border border-slate-100">
+                        </div>
                     </div>
                 </div>
-                
-                <div class="p-8 space-y-4">
-                    <h2 id="prev-title" class="text-xl font-black text-slate-800 leading-tight">Post Headline Preview</h2>
-                    <p id="prev-desc" class="text-[13px] text-slate-600 leading-relaxed">Your message appears here...</p>
-                </div>
-                
-                <div class="px-8 pb-8">
-                    <img id="prev-img" src="IIG LOGO.jpeg" class="w-full h-64 object-cover rounded-[2rem] shadow-lg border border-slate-100">
-                    <p id="img-label" class="text-[8px] text-center mt-3 font-black uppercase text-slate-300 tracking-widest">Default Network Branding Active</p>
-                </div>
 
-                <div class="px-10 py-5 bg-slate-50 flex items-center justify-between border-t">
-                    <div class="flex space-x-10 text-slate-400">
-                        <div onclick="toggleLike(this)" class="interaction-icon flex items-center">
-                             <i class="far fa-heart text-xl mr-2"></i>
-                             <span class="text-[10px] font-black uppercase tracking-widest">Like</span>
+                <div class="space-y-6">
+                    <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em] ml-6">Active Network Feed</h3>
+                    <div id="broadcast-feed" class="space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar pr-4">
                         </div>
-                        
-                        <div onclick="simulateComment()" class="interaction-icon flex items-center hover:text-blue-500">
-                             <i class="far fa-comment text-xl mr-2"></i>
-                             <span id="comment-count-prev" class="text-[10px] font-black uppercase tracking-widest">Comment (0)</span>
-                        </div>
-
-                        <div onclick="alert('Sharing disabled in preview mode.')" class="interaction-icon flex items-center hover:text-green-600">
-                             <i class="fas fa-share text-xl mr-2"></i>
-                             <span class="text-[10px] font-black uppercase tracking-widest">Share</span>
-                        </div>
-                    </div>
-                    <span class="text-[8px] font-black uppercase text-slate-300 tracking-widest">Verified Node</span>
-                </div>
-
-                <div id="preview-comment-input" class="hidden p-6 bg-slate-100 border-t flex space-x-3">
-                    <input type="text" placeholder="Write a comment..." disabled class="flex-1 px-4 py-2 rounded-full border bg-white text-xs opacity-50">
-                    <button disabled class="bg-green-600 text-white px-4 py-2 rounded-full text-[10px] font-black opacity-50">Post</button>
                 </div>
             </div>
         </div>
     </main>
-
-    <div id="greeting-bubble" class="hidden fixed bottom-8 right-8 z-[500] float-greeting">
-        <div class="gradient-dark p-4 rounded-3xl shadow-2xl flex items-center space-x-4 border-2 border-white/20 backdrop-blur-xl">
-            <div class="h-10 w-10 bg-green-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                <i class="fas fa-feather-alt"></i>
-            </div>
-            <div class="pr-4">
-                <p class="text-[8px] font-black text-green-300 uppercase leading-none mb-1">IIG SMART FARMERS Authorized</p>
-                <h4 id="greeting-text" class="text-[11px] font-black text-white uppercase tracking-tight">Post Editor Ready</h4>
-            </div>
-        </div>
-    </div>
 
     <script>
         const firebaseConfig = {
@@ -174,32 +143,70 @@
         const whitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
 
         auth.onAuthStateChanged(user => {
-            if (user && whitelist.includes(user.email)) {
+            if (user && whitelist.includes(user.email.toLowerCase())) {
                 document.getElementById('post-ui').classList.remove('hidden');
-                document.getElementById('greeting-bubble').classList.remove('hidden');
+                document.getElementById('auth-status').classList.remove('hidden');
                 document.getElementById('user-email-nav').innerText = user.email;
-                document.getElementById('greeting-text').innerText = `Admin: ${user.email.split('@')[0]}`;
+                loadActiveFeed();
             } else {
                 if (user) auth.signOut();
                 window.location.href = "index.html";
             }
         });
 
+        // Load and Listen to the Broadcast Feed
+        function loadActiveFeed() {
+            database.ref('activities').on('value', snapshot => {
+                const feed = document.getElementById('broadcast-feed');
+                feed.innerHTML = '';
+                const data = snapshot.val();
+                
+                if (!data) {
+                    feed.innerHTML = '<p class="text-center py-10 text-slate-400 text-[10px] uppercase font-bold tracking-widest">No Intelligence Nodes Active</p>';
+                    return;
+                }
+
+                // Sort by most recent
+                Object.entries(data).reverse().forEach(([id, post]) => {
+                    feed.innerHTML += `
+                        <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition">
+                            <div class="p-5 flex justify-between items-center bg-slate-50 border-b">
+                                <div class="flex items-center space-x-3">
+                                    <div class="h-8 w-8 bg-green-800 rounded-full flex items-center justify-center text-white text-[10px] font-black">IIG</div>
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase text-slate-700">${post.category}</p>
+                                        <p class="text-[8px] font-bold text-slate-400 uppercase">${new Date(post.timestamp).toLocaleString()}</p>
+                                    </div>
+                                </div>
+                                <button onclick="deletePost('${id}')" class="text-[8px] font-black text-red-500 uppercase hover:bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 transition">
+                                    <i class="fas fa-trash-alt mr-1"></i> Delete Node
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <h4 class="font-black text-slate-800 uppercase text-sm mb-2">${post.title}</h4>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-4">${post.description}</p>
+                                ${post.media ? `<img src="${post.media}" class="w-full h-48 object-cover rounded-xl border">` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        async function deletePost(id) {
+            if(confirm("DANGER: Permanently decommission this intelligence node?")) {
+                try {
+                    await database.ref('activities/' + id).remove();
+                } catch (err) {
+                    alert("Sync Error: " + err.message);
+                }
+            }
+        }
+
         function updatePreview() {
-            document.getElementById('prev-title').innerText = document.getElementById('event-title').value || "Post Headline Preview";
-            document.getElementById('prev-desc').innerText = document.getElementById('event-desc').value || "Your message appears here...";
+            document.getElementById('prev-title').innerText = document.getElementById('event-title').value || "Intel Headline Preview";
+            document.getElementById('prev-desc').innerText = document.getElementById('event-desc').value || "Intelligence payload description will appear here...";
             document.getElementById('prev-cat').innerText = document.querySelector('input[name="category"]:checked').value;
-        }
-
-        function toggleLike(element) {
-            const icon = element.querySelector('i');
-            icon.classList.toggle('fas');
-            icon.classList.toggle('far');
-            element.classList.toggle('liked');
-        }
-
-        function simulateComment() {
-            document.getElementById('preview-comment-input').classList.toggle('hidden');
         }
 
         let customImageUploaded = false;
@@ -208,9 +215,8 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('prev-img').src = e.target.result;
-                document.getElementById('img-label').innerText = "Custom Media Attached";
-                document.getElementById('img-label').classList.replace('text-slate-300', 'text-green-500');
                 customImageUploaded = true;
+                updatePreview();
             }
             if(file) reader.readAsDataURL(file);
         }
@@ -219,24 +225,29 @@
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-satellite-dish animate-pulse mr-2"></i> Syncing Hub...';
+            btn.innerHTML = '<i class="fas fa-satellite-dish animate-pulse mr-2"></i> Transmitting...';
 
             const payload = {
-                title: document.getElementById('event-title').value,
+                title: document.getElementById('event-title').value.toUpperCase(),
                 description: document.getElementById('event-desc').value,
                 category: document.querySelector('input[name="category"]:checked').value,
-                timestamp: new Date().toISOString(),
+                timestamp: Date.now(),
                 author: auth.currentUser.email,
                 media: customImageUploaded ? document.getElementById('prev-img').src : null
             };
 
             try {
                 await database.ref('activities').push(payload);
-                alert("Intelligence deployed successfully! 🚀");
-                location.reload();
+                alert("Intelligence deployed to the IIG Smart Farmers network! 🚀");
+                document.getElementById('activity-form').reset();
+                document.getElementById('prev-img').src = 'IIG LOGO.jpeg';
+                customImageUploaded = false;
+                updatePreview();
             } catch (err) {
-                alert("Error: " + err.message);
+                alert("Critical Link Failure: " + err.message);
+            } finally {
                 btn.disabled = false;
+                btn.innerHTML = 'Publish to IIG SMART FARMERS NETWORK';
             }
         };
     </script>

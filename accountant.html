@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Audit Terminal | IIG SMART FARMERS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; scroll-behavior: smooth; }
+        .gradient-dark { background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); }
+        .hero-pattern { background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+        
+        /* Base Node Styles */
+        .center-node { border-left: 6px solid #10b981; margin-bottom: 1.5rem; border-radius: 1.5rem; overflow: hidden; background: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
+        .group-node { border-left: 5px solid #3b82f6; margin-left: 1rem; margin-top: 0.75rem; border-radius: 1rem; background: #f8fafc; padding: 0.75rem; transition: all 0.3s ease; }
+        .member-node { border-left: 3px solid #cbd5e1; margin-left: 1.5rem; margin-top: 0.5rem; border-radius: 0.75rem; background: white; transition: all 0.2s ease; cursor: pointer; }
+        
+        /* Status Marking: Red for "Viewed" nodes to avoid repetition */
+        .viewed-center { border-left-color: #ef4444 !important; background-color: #fef2f2 !important; }
+        .viewed-group { border-left-color: #ef4444 !important; background-color: #fff1f1 !important; }
+        .viewed-member { border-left-color: #ef4444 !important; background-color: #fff1f1 !important; }
+
+        .member-node:hover { border-color: #10b981; transform: translateX(5px); background: #f0fdf4; }
+        
+        .modal-active { display: flex !important; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .rotate-icon { transform: rotate(90deg); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 overflow-x-hidden">
+
+    <nav class="bg-white/95 backdrop-blur-md border-b border-green-100 sticky top-0 z-[100] px-4 md:px-6 py-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 bg-green-800 rounded-xl flex items-center justify-center text-white font-black shadow-lg">IIG</div>
+                <h1 class="font-black text-[10px] md:text-xs uppercase tracking-widest text-green-800 leading-none">Accountant Terminal<br><span class="text-[8px] text-slate-400">Deep Ledger Node — Certified</span></h1>
+            </div>
+            
+            <div id="auth-status" class="hidden flex items-center space-x-4">
+                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest border px-3 py-1 rounded-full bg-slate-50">Audit Session Active</span>
+                <button onclick="auth.signOut()" class="no-print text-red-500 font-black text-[10px] uppercase border border-red-100 px-4 py-2 rounded-xl hover:bg-red-50 transition">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-8">
+        
+        <div id="login-ui" class="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden mt-12 border">
+            <div class="gradient-dark p-10 text-white text-center hero-pattern">
+                <i class="fas fa-vault text-5xl text-emerald-400 mb-4"></i>
+                <h2 class="text-2xl font-black uppercase tracking-widest">Security Gate</h2>
+                <p class="text-emerald-400 text-[10px] font-bold uppercase mt-2">IIG Financial Protocol Authentication</p>
+            </div>
+            <form id="login-form" class="p-8 space-y-5">
+                <input type="email" id="admin-email" placeholder="Official Email" class="w-full p-4 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 font-bold" required>
+                <input type="password" id="admin-password" placeholder="Personnel Pin" class="w-full p-4 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 font-bold" required>
+                <button type="submit" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl shadow-xl hover:bg-green-700 transition uppercase text-sm">Open Master Ledger</button>
+            </form>
+        </div>
+
+        <div id="dashboard-ui" class="hidden space-y-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-t-4 border-t-emerald-500">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hub Liquidity (GCA)</p>
+                    <h3 id="stat-total-gca" class="text-3xl font-black text-emerald-700">KSh 0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-t-4 border-t-blue-500">
+                    <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-1">Regulated Funds (MSA)</p>
+                    <h3 id="stat-total-msa" class="text-3xl font-black text-blue-600">KSh 0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm border-t-4 border-t-indigo-500">
+                    <p class="text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-1">Personal Nodes (PSA)</p>
+                    <h3 id="stat-total-psa" class="text-3xl font-black text-indigo-600">KSh 0</h3>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b pb-4">
+                    <h2 class="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Master Audit Lookup</h2>
+                    <input type="text" id="master-search" oninput="filterLedger()" placeholder="Search Hub, Group, or Member Name..." class="no-print w-full md:w-96 px-6 py-3 rounded-xl border bg-slate-50 outline-none focus:ring-2 focus:ring-green-500 text-xs font-bold shadow-inner">
+                </div>
+                <div id="ledger-tree" class="space-y-4 pb-10 max-h-[70vh] overflow-y-auto custom-scrollbar pr-2">
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="audit-modal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-xl z-[200] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="gradient-dark p-8 text-white flex justify-between items-center hero-pattern">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400 mb-1 leading-none">Full Account Timeline</p>
+                    <h3 id="modal-member-name" class="text-2xl font-black uppercase tracking-tighter">CLIENT NODE</h3>
+                </div>
+                <button onclick="closeAuditModal()" class="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center hover:bg-red-500 transition shadow-lg"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="audit-logs-container" class="p-6 md:p-10 space-y-8 overflow-y-auto custom-scrollbar bg-slate-50 flex-1">
+                </div>
+
+            <div class="p-6 bg-white border-t flex justify-between items-center no-print">
+                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Certified Accountability Record — No Modification Enabled</p>
+                <button onclick="window.print()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg hover:bg-slate-800 transition"><i class="fas fa-print mr-2"></i> Export Ledger History</button>
+            </div>
+        </div>
+    </div>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDG3C4wwetbVFHCNt3latkgM7-3ntOfFmg",
+        authDomain: "help-me-up-70fcc.firebaseapp.com",
+        databaseURL: "https://help-me-up-70fcc-default-rtdb.firebaseio.com",
+        projectId: "help-me-up-70fcc",
+        storageBucket: "help-me-up-70fcc.firebasestorage.app",
+        messagingSenderId: "593893312398",
+        appId: "1:593893312398:web:a982fca857289fc2f206df"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth(), database = firebase.database();
+
+    let db_centers = {}, db_groups = {}, db_members = {}, db_audits = {};
+    let viewedMembers = new Set();
+
+    // --- ACCESS CONTROL GATEKEEPER ---
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            const masterWhitelist = ['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'];
+            
+            // 1. Immediate Master Bypass
+            if (masterWhitelist.includes(user.email.toLowerCase())) {
+                showDashboard();
+                return;
+            }
+
+            // 2. Verify against Organization Staff Database
+            database.ref(`organization/staff/${user.uid}`).once('value', snapshot => {
+                const staffData = snapshot.val();
+                
+                // Only allow if they exist and have a valid staff role
+                if (snapshot.exists() && (staffData.role === 'admin' || staffData.role === 'cgt')) {
+                    showDashboard();
+                } else {
+                    // USER IS A MEMBER OR UNAUTHORIZED STAFF
+                    handleUnauthorizedAccess("Access Denied: This terminal is restricted to CGTs and Admins only.");
+                }
+            }).catch(err => {
+                console.error("Auth verification failed", err);
+                handleUnauthorizedAccess("Security verification failed. Please login again.");
+            });
+
+        } else {
+            // No user logged in
+            document.getElementById('login-ui').classList.remove('hidden');
+            document.getElementById('dashboard-ui').classList.add('hidden');
+            document.getElementById('auth-status').classList.add('hidden');
+        }
+    });
+
+    function handleUnauthorizedAccess(message) {
+        alert(message);
+        auth.signOut().then(() => {
+            window.location.href = "index.html"; // Redirect to the member-facing page
+        });
+    }
+
+    function showDashboard() {
+        document.getElementById('login-ui').classList.add('hidden');
+        document.getElementById('dashboard-ui').classList.remove('hidden');
+        document.getElementById('auth-status').classList.remove('hidden');
+        startAuditSync();
+    }
+
+    // --- LOGIN FORM HANDLER ---
+    document.getElementById('login-form').onsubmit = (e) => {
+        e.preventDefault();
+        const email = document.getElementById('admin-email').value;
+        const pass = document.getElementById('admin-password').value;
+        
+        auth.signInWithEmailAndPassword(email, pass).catch(err => {
+            alert("Authentication Error: " + err.message);
+        });
+    };
+
+    function startAuditSync() {
+        database.ref('organization/centers').on('value', s => { db_centers = s.val() || {}; buildLedger(); });
+        database.ref('organization/groups').on('value', s => { db_groups = s.val() || {}; buildLedger(); });
+        database.ref('records/members').on('value', s => { db_members = s.val() || {}; buildLedger(); });
+        database.ref('records/audits').on('value', s => { db_audits = s.val() || {}; buildLedger(); });
+    }
+
+    // --- LEDGER & MODAL LOGIC (UNCHANGED) ---
+    const safeNum = (v) => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
+    // Add to auth.onAuthStateChanged success block
+database.ref('system_settings/maintenance_mode').on('value', snap => {
+    if (snap.val() === true && !['iigsmartfarmersltd@gmail.com', 'delstarfordisaiah@gmail.com'].includes(auth.currentUser.email)) {
+        document.body.innerHTML = `
+            <div class="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-white p-10 text-center">
+                <i class="fas fa-tools text-6xl text-green-400 mb-6 animate-bounce"></i>
+                <h1 class="text-3xl font-black uppercase tracking-widest">System Maintenance</h1>
+                <p class="mt-4 text-slate-400 text-xs uppercase tracking-widest leading-loose">Access to the Strategic Terminal is currently restricted.<br>Synchronizing global ledger security. Please stand by.</p>
+            </div>`;
+    }
+});
+    initializePresence(user.email);
+    function buildLedger() {
+        const tree = document.getElementById('ledger-tree');
+        tree.innerHTML = "";
+        let sums = { gca: 0, msa: 0, psa: 0 };
+
+        if (Object.keys(db_centers).length === 0) return;
+
+        Object.entries(db_centers).sort((a,b) => a[1].name.localeCompare(b[1].name)).forEach(([cId, hub]) => {
+            const groups = Object.entries(db_groups).filter(([_, g]) => g.parentCenter === cId);
+            let hubTotal = 0;
+            let hasViewedMemberInHub = false;
+
+            let groupHtml = groups.map(([gId, group]) => {
+                const members = Object.entries(db_members).filter(([_, m]) => m.groupId === gId);
+                let groupTotal = 0;
+                let hasViewedMemberInGroup = false;
+
+                let memberHtml = members.map(([mId, m]) => {
+                    const audits = Object.values(db_audits).filter(a => a.farmerPhone === m.phone).sort((a,b) => b.timestamp - a.timestamp);
+                    const f = audits[0]?.financials || {};
+                    const msaVal = safeNum(f.msa) + safeNum(f.gff) + safeNum(f.gmf) + safeNum(f.gsf);
+                    const psaVal = safeNum(f.psa) + safeNum(f.afs) + safeNum(f.fis);
+                    const mTotal = msaVal + psaVal;
+                    sums.msa += msaVal; sums.psa += psaVal; sums.gca += mTotal; groupTotal += mTotal;
+                    const isViewed = viewedMembers.has(mId);
+                    if(isViewed) { hasViewedMemberInGroup = true; hasViewedMemberInHub = true; }
+
+                    return `
+                        <div onclick="inspectMember('${mId}', '${gId}', '${cId}')" class="member-node p-4 border border-slate-100 flex justify-between items-center group/m ${isViewed ? 'viewed-member' : ''}" data-search="${hub.name} ${group.name} ${m.name} ${m.phone}">
+                            <div class="leading-tight">
+                                <p class="font-black text-[11px] uppercase text-slate-800">${m.name}</p>
+                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">${m.phone}</p>
+                            </div>
+                            <div class="flex items-center space-x-10 text-right">
+                                <div class="w-24"><p class="text-[7px] font-black text-blue-500 uppercase">Regulated</p><p class="text-[10px] font-black">KSh ${msaVal.toLocaleString()}</p></div>
+                                <div class="w-24"><p class="text-[7px] font-black text-indigo-500 uppercase">Personal</p><p class="text-[10px] font-black">KSh ${psaVal.toLocaleString()}</p></div>
+                                <div class="h-8 w-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-300 group-hover/m:bg-emerald-50 group-hover/m:text-emerald-500 transition"><i class="fas fa-history text-xs"></i></div>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                hubTotal += groupTotal;
+                return `
+                    <div id="group-node-${gId}" class="group-node border border-slate-200 shadow-sm ${hasViewedMemberInGroup ? 'viewed-group' : ''}">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleNode('node-${gId}')">
+                            <div class="flex items-center"><i id="icon-node-${gId}" class="fas fa-chevron-right mr-3 text-blue-500 transition-transform"></i><h4 class="font-black text-xs uppercase tracking-tight">${group.name} Hub</h4></div>
+                            <div class="bg-blue-900 text-white px-3 py-1 rounded-full text-[8px] font-black font-mono shadow-md">Bal: KSh ${groupTotal.toLocaleString()}</div>
+                        </div>
+                        <div id="node-${gId}" class="hidden mt-3 space-y-1">${memberHtml || '<p class="text-center italic text-slate-400 text-[8px] p-2">Hub inactive</p>'}</div>
+                    </div>`;
+            }).join('');
+
+            tree.innerHTML += `
+                <div id="center-node-${cId}" class="center-node p-6 border-2 border-slate-50 ${hasViewedMemberInHub ? 'viewed-center' : ''}">
+                    <div class="flex justify-between items-center border-b pb-4 mb-4 cursor-pointer" onclick="toggleNode('node-${cId}')">
+                        <div class="flex items-center"><i id="icon-node-${cId}" class="fas fa-map-marker-alt mr-4 text-emerald-600"></i><h3 class="text-lg font-black uppercase text-slate-800 tracking-tighter">${hub.name} Ward Node</h3></div>
+                        <div class="text-right">
+                            <p class="text-[9px] font-black text-slate-400 uppercase leading-none mb-1 tracking-widest">Aggregate Hub Liquidity</p>
+                            <p class="text-xl font-black text-emerald-700 font-mono tracking-tighter">KSh ${hubTotal.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div id="node-${cId}" class="space-y-4">${groupHtml || '<p class="text-center py-4 text-[9px] text-slate-300 italic uppercase">No groups assigned</p>'}</div>
+                </div>`;
+        });
+
+        document.getElementById('stat-total-gca').innerText = `KSh ${sums.gca.toLocaleString()}`;
+        document.getElementById('stat-total-msa').innerText = `KSh ${sums.msa.toLocaleString()}`;
+        document.getElementById('stat-total-psa').innerText = `KSh ${sums.psa.toLocaleString()}`;
+    }
+
+    function inspectMember(mId, gId, cId) {
+        const m = db_members[mId];
+        if(!m) return;
+        viewedMembers.add(mId);
+        buildLedger(); 
+        
+        const logs = Object.values(db_audits).filter(a => a.farmerPhone === m.phone).sort((a,b) => Number(b.timestamp) - Number(a.timestamp));
+        document.getElementById('modal-member-name').innerText = `${m.name} — Node identity: ${m.phone}`;
+        const container = document.getElementById('audit-logs-container');
+        container.innerHTML = "";
+
+        if(logs.length === 0) {
+            container.innerHTML = `<div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200"><p class="text-slate-400 font-black uppercase text-[10px]">Registry Empty: No historical data packets found.</p></div>`;
+        } else {
+            logs.forEach(log => {
+                const f = log.financials || {};
+                const ts = new Date(log.timestamp);
+                const total = Object.values(f).reduce((a,b) => safeNum(a) + safeNum(b), 0);
+                container.innerHTML += `
+                <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition">
+                    <div class="bg-slate-900 px-8 py-3 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                            <p class="text-[10px] font-black text-white uppercase tracking-widest">Entry Date: ${ts.toLocaleDateString()} | Sync Time: ${ts.toLocaleTimeString()}</p>
+                        </div>
+                        <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Certified Record</p>
+                    </div>
+                    <div class="p-8 grid md:grid-cols-4 gap-8">
+                        <div class="md:col-span-1 border-r border-slate-100 flex flex-col items-center">
+                            <p class="text-[8px] font-black text-slate-300 uppercase mb-3">Audit Evidence</p>
+                            <img src="${log.verificationMedia || 'https://via.placeholder.com/150?text=NO+IMAGE'}" class="h-32 w-32 object-cover rounded-[2rem] border-4 border-white shadow-xl cursor-zoom-in" onclick="window.open(this.src)">
+                            <p class="text-[8px] font-bold text-slate-400 mt-4 uppercase">Officer: ${log.officer || 'UNKN'}</p>
+                        </div>
+                        <div class="md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p class="text-[7px] font-bold text-blue-500 uppercase mb-1">MSA</p><p class="text-xs font-black">KSh ${safeNum(f.msa).toLocaleString()}</p></div>
+                            <div class="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p class="text-[7px] font-bold text-blue-500 uppercase mb-1">Fines (GFF)</p><p class="text-xs font-black">KSh ${safeNum(f.gff).toLocaleString()}</p></div>
+                            <div class="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p class="text-[7px] font-bold text-blue-500 uppercase mb-1">Mwalimu (GMF)</p><p class="text-xs font-black">KSh ${safeNum(f.gmf).toLocaleString()}</p></div>
+                            <div class="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p class="text-[7px] font-bold text-blue-500 uppercase mb-1">Social (GSF)</p><p class="text-xs font-black">KSh ${safeNum(f.gsf).toLocaleString()}</p></div>
+                            <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p class="text-[7px] font-bold text-indigo-500 uppercase mb-1">Personal (PSA)</p><p class="text-xs font-black">KSh ${safeNum(f.psa).toLocaleString()}</p></div>
+                            <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p class="text-[7px] font-bold text-indigo-500 uppercase mb-1">Inputs (FIS)</p><p class="text-xs font-black">KSh ${safeNum(f.fis).toLocaleString()}</p></div>
+                            <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p class="text-[7px] font-bold text-indigo-500 uppercase mb-1">Assets (AFS)</p><p class="text-xs font-black">KSh ${safeNum(f.afs).toLocaleString()}</p></div>
+                            <div class="p-3 bg-emerald-900 text-white rounded-2xl"><p class="text-[7px] font-bold text-emerald-300 uppercase mb-1">Aggregate</p><p class="text-xs font-black">KSh ${total.toLocaleString()}</p></div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+        document.getElementById('audit-modal').classList.add('modal-active');
+    }
+
+    function closeAuditModal() { document.getElementById('audit-modal').classList.remove('modal-active'); }
+    function toggleNode(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById('icon-'+id)?.classList.toggle('rotate-icon'); }
+    function filterLedger() {
+        const term = document.getElementById('master-search').value.toLowerCase().trim();
+        document.querySelectorAll('.center-node').forEach(node => {
+            const match = node.dataset.search?.toLowerCase().includes(term);
+            node.style.display = (match || term === "") ? "block" : "none";
+        });
+
+    function initializePresence(email) {
+    const statusRef = database.ref('/status/' + auth.currentUser.uid);
+    database.ref('.info/connected').on('value', snap => {
+        if (snap.val() === false) return;
+        // Sets status to online when connected
+        statusRef.onDisconnect().set({ state: 'offline', last_changed: firebase.database.ServerValue.TIMESTAMP, email: email, kick: false })
+        .then(() => {
+            statusRef.set({ state: 'online', last_changed: firebase.database.ServerValue.TIMESTAMP, email: email, kick: false });
+        });
+    });
+}
+    }
+</script>
+</body>
+</html>
